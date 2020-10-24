@@ -83,6 +83,7 @@ void simulatorSetup()
 bool
 dropPacket()
 {
+    srand (time(NULL));
     bool result;
     (rand()%100 <= Meta.InterferanceLevel) ? result = true : result =  false;
     
