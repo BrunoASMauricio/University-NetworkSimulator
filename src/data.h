@@ -36,6 +36,8 @@ typedef struct{
     bool WF_RXsimulator;
     bool WS_TXsimulator;
     bool HW_RXsimulator;
+    bool Interferance;
+    int InterferanceLevel;
 	
     FILE* Log;
 } meta_data;

@@ -1,8 +1,9 @@
 #include "main.h"
 #include "TX.h"
 #include "data.h"
-#include "simulator.c"
+#include "simulator.h"
 #include <bits/getopt_core.h>
+#include <stdio.h>
 
 /*
  * Main function
@@ -26,10 +27,11 @@ main(int argc, char **argv)
 			{"log",		no_argument,		0, 'l'},
 			{"post",	no_argument,		0, 'p'},
 			{"debug",	no_argument,		0, 'd'},
+			{"Interferance",	no_argument,0, 'I'},
 			{0,			0,					0,  0 }
 		};
 
-		c = getopt_long(argc, argv, "lpdrs:", long_options, &option_index);
+		c = getopt_long(argc, argv, "lIpdrs:", long_options, &option_index);
 
 		if (c == -1)	break;
 
@@ -85,7 +87,16 @@ main(int argc, char **argv)
                 }
 				break;
 
-			case 'd':
+			case 'I':
+                printf("Interferance detected\n");
+				Meta.Interferance = true;
+				Meta.InterferanceLevel = 50;
+                //TODO(GoncaloXavier): Allow this vale to come from argv, 
+                //I don't have experience with getopt, will look into this
+				//Meta.InterferanceLevel = INPUT ARG;
+				break;
+			
+            case 'd':
 				Meta.Debug = true;
 				break;
 
@@ -168,8 +179,21 @@ handler()
 	while (1)
     {
 		Message = getMessage();
-		if(Message == NULL) continue;
-		switch (((byte*)Message)[0])
+        if(Message == NULL) 
+        {
+            continue;
+        }
+        
+        if(Meta.Interferance) 
+        {
+            if(dropPacket())
+            {
+                printf("Packet dropped \n");
+                continue;
+            }
+        }
+		
+        switch (((byte*)Message)[0])
         {
 			case SD:
 				handleSD(Message);

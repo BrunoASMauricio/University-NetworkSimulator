@@ -20,6 +20,7 @@ WF_RXsimulator(void* dummy)
     }
 }
 
+//Simulate packet's COMING from WS
 void*
 WS_TXsimulator(void* dummy)
 {
@@ -75,4 +76,15 @@ void simulatorSetup()
             fatalErr("Error: Unable to create Simulator thread, %d\n", rc);
         }
     }
+}
+
+
+
+bool
+dropPacket()
+{
+    bool result;
+    (rand()%100 <= Meta.InterferanceLevel) ? result = true : result =  false;
+    
+    return result;
 }

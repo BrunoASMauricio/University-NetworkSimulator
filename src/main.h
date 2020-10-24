@@ -37,6 +37,7 @@ clean();
 #include "udp.c"
 #include "debug.c"
 #include "protocol.c"
+#include "simulator.c"
 #include "RX.c"
 #include "TX.c"
 

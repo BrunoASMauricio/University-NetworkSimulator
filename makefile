@@ -10,7 +10,7 @@ CC = g++
 all: NPSimulator
 
 NPSimulator: ./src/*
-	$(CC) -o NPSimulator $(FLAGS) ./src/main.c #$(DEBUG)
+	$(CC) -g -o NPSimulator $(FLAGS) ./src/main.c #$(DEBUG)
 
 
 
