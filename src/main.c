@@ -184,6 +184,8 @@ handler()
             continue;
         }
         
+		//NOTE(GoncaloXavier): This should be moved to the WF TX simulator section,
+		//per specifiaction of issue "WF TX Simulator"
         if(Meta.Interferance) 
         {
             if(dropPacket())
