@@ -22,6 +22,7 @@ typedef struct{
 	int id;
 	int* SNR;
 	int IP;
+	int process_id;
 	pthread_t thread_handle;
 	socket_s* WF_TX;
 	socket_s* WF_RX;

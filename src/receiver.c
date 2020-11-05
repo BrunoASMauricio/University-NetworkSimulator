@@ -27,7 +27,7 @@ void* receiver(void* _node_id)
 		sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
 		sprintf(pIP, "%d", S.nodes[node_id].IP);
 		printf("%s -s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -dlp\n", PATH_TO_NODE, pWS, pHW, pWF_TX, pWF_RX, pIP);
-		//execl(PATH_TO_NODE, "-s", "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "-IP", pIP, "-dlp", NULL);
+		execl(PATH_TO_NODE, "-s", "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-dl", NULL);
 		// Only runs if exec fails
 		//fatalErr("Could not start node %d\n", node_id);
     }
@@ -39,6 +39,9 @@ void* receiver(void* _node_id)
 		int ReadBytes = 0;
 		int PrevBytes = 0;
 		unsigned long int arrival;
+
+		S.nodes[node_id].process_id = pid;
+		
 		while(1)
 		{
 			ReadBytes = getFromSocket(S.nodes[node_id].WF_RX, buff+PrevBytes);

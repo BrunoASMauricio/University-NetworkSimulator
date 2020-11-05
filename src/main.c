@@ -98,6 +98,7 @@ void intHandler(int dummy) {
 	printf("Shutting down simulator\n");
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
+		kill(S.nodes[node_id].process_id, SIGINT);
 		close(S.nodes[node_id].HW->s);
 		close(S.nodes[node_id].WS->s);
 		close(S.nodes[node_id].WF_TX->s);
