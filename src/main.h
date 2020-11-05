@@ -6,8 +6,13 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
+#include <pthread.h>
 
 #include "udp.c"
+#include "data.h"
+
+#define SAMPLE_SIZE 16
 
 typedef uint8_t byte;
 
@@ -29,13 +34,21 @@ typedef struct{
 	int node_ammount;
 	int master;
 	node* nodes;
+	queue* Sent;
 }sim;
 
 sim S;
 
 void setupNodes();
 
+int newIP();
+
+void intHandler(int dummy);
+
+void simulator();
+
 #include "debug.c"
+#include "data.c"
 #include "receiver.c"
 
 #endif

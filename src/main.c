@@ -47,6 +47,7 @@ main(int argc, char **argv)
 	{
 		S.nodes[node_id].id = node_id;
 		S.nodes[node_id].SNR = (int*)malloc(sizeof(int)*(S.node_ammount));
+		S.nodes[node_id].IP = -1;
 
 		for(int other_node = 0; other_node < S.node_ammount; other_node++)
 		{
@@ -75,6 +76,8 @@ main(int argc, char **argv)
 
 	printNetwork();
 
+	signal(SIGINT, intHandler);
+
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
 		if(rc = pthread_create(&(S.nodes[node_id].thread_handle), NULL, receiver, &(S.nodes[node_id].id)))
@@ -83,16 +86,25 @@ main(int argc, char **argv)
 		}
 	}
 
+	simulator();
 
 	while(1)
 	{
 		sleep(1);
 	}
-
-    exit(EXIT_SUCCESS);
 }
 
-
+void intHandler(int dummy) {
+	printf("Shutting down simulator\n");
+	for(int node_id = 0; node_id < S.node_ammount; node_id++)
+	{
+		close(S.nodes[node_id].HW->s);
+		close(S.nodes[node_id].WS->s);
+		close(S.nodes[node_id].WF_TX->s);
+		close(S.nodes[node_id].WF_RX->s);
+	}
+	exit(EXIT_SUCCESS);
+}
 
 void setupNodes()
 {
@@ -102,6 +114,18 @@ void setupNodes()
 		S.nodes[node_id].WS = newServerSocket();
 		S.nodes[node_id].WF_TX = newServerSocket();
 		S.nodes[node_id].WF_RX = newServerSocket();
+		S.nodes[node_id].IP = newIP();
 	}
+
+}
+
+int newIP()
+{
+	static int ip = 0;
+	return ++ip;
+}
+
+void simulator()
+{
 
 }
