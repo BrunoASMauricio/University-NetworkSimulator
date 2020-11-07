@@ -88,10 +88,6 @@ main(int argc, char **argv)
 
 	simulator();
 
-	while(1)
-	{
-		sleep(1);
-	}
 }
 
 void intHandler(int dummy) {
@@ -129,5 +125,66 @@ int newIP()
 
 void simulator()
 {
+	void* buf;
+	int bufsize;
+	timespec Res;
+	bool colided;
+	unsigned long int Act;
+	unsigned long int intersect_t;
+
+	while(1)
+	{
+		// Wait for at least a single element in queue
+		while(!S.Sent->Size)
+		{
+			usleep(SIM_DELAY);
+		}
+
+		clock_gettime(CLOCK_REALTIME, &Res);
+		Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
+
+		// Wait to check for collisions
+		if(S.Sent->First->Pr + SIM_DELAY > Act)
+		{
+			usleep(SIM_DELAY - ((Act-S.Sent->First->Pr)/1000));
+			clock_gettime(CLOCK_REALTIME, &Res);
+			Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
+		}
+
+		pthread_mutex_lock(&(S.Lock));
+
+		// Calculate colision based on sent time + time to send per
+		// bit * ammount of bits
+		intersect_t = S.Sent->First->Pr + bufsize*(WF_delay*1000);
+		printf("-------------------------------------\n");
+		printf("\t\t %d messages sent\n", S.Sent->Size);
+
+		colided = false;
+		printf("Analyzing colisions starting at %lu and ending at %lu\n", S.Sent->First->Pr, intersect_t);
+		for(int msg = 1; msg < S.Sent->Size; msg++)
+		{
+			
+			if(getFromQueue(S.Sent, msg) < intersect_t)
+			{
+				printf("Colided message %lu \n", getFromQueue(S.Sent, msg));
+				buf = popFromQueue(&bufsize, S.Sent, msg);
+				printMessage(buf, bufsize);
+				msg -= 1;
+			}else{
+				printf("No collision\n");
+			}
+		}
+		if(colided)
+		{
+			printf("Colided message\n");
+			buf = popFromQueue(&bufsize, S.Sent);
+			printMessage(buf, bufsize);
+		}
+		while(S.Sent->Size)
+		{
+			buf = popFromQueue(&bufsize, S.Sent);
+		}
+		pthread_mutex_unlock(&(S.Lock));
+	}
 
 }

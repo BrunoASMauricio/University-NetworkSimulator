@@ -13,6 +13,11 @@
 #include "data.h"
 
 #define SAMPLE_SIZE 16
+// Simulatorr delay in us
+#define SIM_DELAY 1E6	//1 s
+// WF delay per bit in us
+//#define WF_delay 10	// 10us/bit
+#define WF_delay 60000
 
 typedef uint8_t byte;
 
@@ -31,11 +36,12 @@ typedef struct{
 }node;
 
 typedef struct{
-	FILE* events;
-	int node_ammount;
 	int master;
 	node* nodes;
 	queue* Sent;
+	FILE* events;
+	int node_ammount;
+	pthread_mutex_t Lock;
 }sim;
 
 sim S;

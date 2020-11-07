@@ -9,7 +9,7 @@ void* receiver(void* _node_id)
 	
 	node_id	= *((int*)_node_id);
 
-	printf("Started thread for node %d\n", node_id);
+	printf("Started receiver thread for node %d\n", node_id);
 
 	pid = fork();
 
@@ -26,8 +26,8 @@ void* receiver(void* _node_id)
 		sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
 		sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
 		sprintf(pIP, "%d", S.nodes[node_id].IP);
-		printf("%s -s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -dlp\n", PATH_TO_NODE, pWS, pHW, pWF_TX, pWF_RX, pIP);
-		execl(PATH_TO_NODE, "-s", "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-dl", NULL);
+		printf("%s -q -s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -dlp\n", PATH_TO_NODE, pWS, pHW, pWF_TX, pWF_RX, pIP);
+		execl(PATH_TO_NODE, "-s","-q", "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-dl", NULL);
 		// Only runs if exec fails
 		//fatalErr("Could not start node %d\n", node_id);
     }
@@ -48,12 +48,12 @@ void* receiver(void* _node_id)
 			{
 				continue;
 			}
-			printf("\nGOT %d bytes\n", ReadBytes);
+			printf("\nGOT %d bytes. ", ReadBytes);
 
 			if(((byte*)buff)[0] & 0x0f == TB && ReadBytes < 144)
 			{
 				PrevBytes = ReadBytes;
-				printf("Got truncated TB\n");
+				printf("Got truncated TB. ");
 				continue;
 			}
 
@@ -61,64 +61,31 @@ void* receiver(void* _node_id)
 
 			if(PacketSize == -1)
 			{
-				dumpBin(buff, ReadBytes, "Packet size returned -1, dumping buffer\n");
+				dumpBin(buff, ReadBytes, "Packet size returned -1, dumping buffer: ");
 				PrevBytes = 0;
 				continue;
 			}
 
-			if(PacketSize > ReadBytes)
+			if(PacketSize > ReadBytes + PrevBytes)
 			{
-				dumpBin(buff, ReadBytes, "Packet size (%d) is more than what was received (%d).\n", PacketSize-8, ReadBytes);
+				dumpBin(buff, ReadBytes, "Packet size (%d) is more than what is stored(%d). ", PacketSize, ReadBytes + PrevBytes);
 				PrevBytes = ReadBytes;
 				continue;
 			}
-			printf("Received ");
-			switch (((byte*)buff)[0])
-			{
-				case SD:
-					printf("SD");
-					break;
-				case PB:
-					printf("PB");
-					break;
-				case PR:
-					printf("PR");
-					break;
-				case PC:
-					printf("PC");
-					break;
-				case TA:
-					printf("TA");
-					break;
-				case TB:
-					printf("TB");
-					break;
-				case NE:
-					printf("NE");
-					break;
-				case NEP:
-					printf("NEP");
-					break;
-				case NER:
-					printf("NER");
-					break;
-				case NEA:
-					printf("NEA");
-					break;
-			}
-			printf("\n");
-			dumpBin(buff, ReadBytes+PrevBytes, "dump: ");
-			fflush(stdout);
 
 			message = malloc(PacketSize-8);
 			memcpy(message, buff, PacketSize-8);
 			arrival = *((unsigned long int*)(buff+PacketSize-8));
-			printf(" message from node %d with IP (%d) received at %lu\n", S.nodes[node_id].id, S.nodes[node_id].IP, arrival);
-			addToQueue(message, PacketSize, S.Sent, arrival);
-			printf("Messages in queue %d\n", S.Sent->Size);
+			//printf("Received from node %d with IP %d at %lu: ", S.nodes[node_id].id, S.nodes[node_id].IP, arrival);
+			//printMessage(buff, ReadBytes+PrevBytes);
+
+
+			pthread_mutex_lock(&(S.Lock));
+			addToQueue(message, PacketSize-8, S.Sent, arrival);
+			pthread_mutex_unlock(&(S.Lock));
 
 			// We received more than one packet
-			if(PacketSize < ReadBytes)
+			if(PacketSize < ReadBytes+PrevBytes)
 			{
 				printf("\t\tMore than one packet (%d, %d), oh no\n", PacketSize, ReadBytes+PrevBytes);
 				// Copy the last of the read bytes, to the beggining of the buffer
@@ -130,9 +97,8 @@ void* receiver(void* _node_id)
 			}
 			PrevBytes = 0;
 
-			sleep(1);	// For testing purposes
+			//sleep(1);	// For testing purposes
 		}
-        waitpid(pid,0,0); /* wait for child to exit */
     }
 	return NULL;
 }

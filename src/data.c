@@ -37,7 +37,7 @@ addToQueue(void* Packet, int Size, queue* Q, unsigned long int Pr)
 	ToSwap = Q->First;
 	LastHigher = Q->First;
 
-	while(ToSwap != NULL && ToSwap->Pr >= Pr)
+	while(ToSwap != NULL && ToSwap->Pr <= Pr)
     {
 		LastHigher = ToSwap;
 		ToSwap = (queue_el*)ToSwap->NextEl;
@@ -69,7 +69,6 @@ addToQueue(void* Packet, int Size, queue* Q, unsigned long int Pr)
 	pthread_mutex_unlock(&(Q->Lock));
 }
 
-
 void*
 popFromQueue(int* Size, queue* Q)
 {	
@@ -93,6 +92,67 @@ popFromQueue(int* Size, queue* Q)
 	free(Popped);
 
 	return Buf;
+}
+
+unsigned long int
+/*
+ * Returns the Priority
+ */
+getFromQueue(queue* Q, int position)
+{
+	queue_el* helper;
+	pthread_mutex_lock(&(Q->Lock));
+	if(position >= Q->Size || position < 0)
+	{
+		pthread_mutex_unlock(&(Q->Lock));
+		return 0;
+	}
+
+	helper = Q->First;
+	for(int i = 0; i < position; i++)
+	{
+		helper =(queue_el*) helper->NextEl;
+	}
+	pthread_mutex_unlock(&(Q->Lock));
+	return helper->Pr;
+}
+
+void*
+popFromQueue(int* Size, queue* Q, int position)
+{
+	queue_el* helper;
+	queue_el* prev;
+	void* buf;
+	pthread_mutex_lock(&(Q->Lock));
+	if(position >= Q->Size || position < 0)
+	{
+		pthread_mutex_unlock(&(Q->Lock));
+		return NULL;
+	}
+	if(!position)
+	{
+		pthread_mutex_unlock(&(Q->Lock));
+		return popFromQueue(Size, Q);
+	}
+
+	helper = Q->First;
+	for(int i = 0; i < position; i++)
+	{
+		prev = helper;
+		helper =(queue_el*) helper->NextEl;
+	}
+	prev->NextEl = helper->NextEl;
+	if(helper == Q->Last)
+	{
+		Q->Last = prev;
+		Q->Last->NextEl = NULL;
+	}
+	*Size = helper->PacketSize;
+	buf = helper->Packet;
+	free(helper);
+	Q->Size -= 1;
+	pthread_mutex_unlock(&(Q->Lock));
+	return buf;
 }
 
 void

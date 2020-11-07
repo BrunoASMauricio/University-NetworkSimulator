@@ -31,6 +31,47 @@ void dumpBin(char* buf, int size, const char *fmt,...)
 	va_end(args);
 }
 
+void printMessage(void* buff, int size)
+{
+	printf("Message (%d bytes):\n\t");
+	switch (((byte*)buff)[0] & 0x0f)
+	{
+		case SD:
+			printf("SD");
+			break;
+		case PB:
+			printf("PB");
+			break;
+		case PR:
+			printf("PR");
+			break;
+		case PC:
+			printf("PC");
+			break;
+		case TA:
+			printf("TA");
+			break;
+		case TB:
+			printf("TB");
+			break;
+		case NE:
+			printf("NE");
+			break;
+		case NEP:
+			printf("NEP");
+			break;
+		case NER:
+			printf("NER");
+			break;
+		case NEA:
+			printf("NEA");
+			break;
+	}
+	dumpBin((char*)buff, size, "\n\tDump: ");
+	printf("\n");
+	fflush(stdout);
+}
+
 void printNode(int node_id)
 {
 	printf("\tNode %d (IP: %d)\n", node_id, S.nodes[node_id].IP);
