@@ -109,6 +109,7 @@ void intHandler(int dummy) {
 
 void setupNodes()
 {
+	S.Sent= newQueue();
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
 		S.nodes[node_id].HW = newServerSocket();

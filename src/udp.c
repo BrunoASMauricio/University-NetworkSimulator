@@ -3,6 +3,7 @@
 
 socket_s* newServerSocket()
 {
+	int opt;
 	socklen_t dummy;
 	struct sockaddr_in client, server;
 	socket_s* ret = (socket_s*)malloc(sizeof(socket_s));
@@ -23,13 +24,21 @@ socket_s* newServerSocket()
 	{
 		fatalErr("Could not get socket info\n");
 	}
-	ret->port = ret->sockaddr.sin_port;
+	ret->port = (unsigned)ntohs(ret->sockaddr.sin_port);
+    opt = fcntl(ret->s, F_GETFL);
+    if (opt < 0) {
+        fatalErr("fcntl(F_GETFL) fail.");
+    }
+    opt |= O_NONBLOCK;
+    if (fcntl(ret->s, F_SETFL, opt) < 0) {
+        fatalErr("fcntl(F_SETFL) fail.");
+    }
 	return ret;
 }
 
-void sendToSocket(socket_s* sk, void* buff, int size)
+int sendToSocket(socket_s* sk, void* buff, int size)
 {
-	sendto(sk->s, buff, size, 0, (struct sockaddr*) &(sk->sockaddr), sk->sock_len);
+	return sendto(sk->s, buff, size, 0, (struct sockaddr*) &(sk->sockaddr), sk->sock_len);
 }
 
 int getFromSocket(socket_s* sk, void* buff)

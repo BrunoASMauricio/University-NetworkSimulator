@@ -7,13 +7,14 @@
 
 #include<arpa/inet.h>
 #include<sys/socket.h>
+#include<fcntl.h>
 #include "debug.h"
 
 typedef struct{
 	int s;
 	struct sockaddr_in sockaddr;
 	socklen_t sock_len;
-	int port;
+	unsigned int port;
 }socket_s;
 
 socket_s* newSocket(int port);
