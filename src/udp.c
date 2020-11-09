@@ -12,6 +12,8 @@ socket_s* newServerSocket()
 		fatalErr("Could not creat socket\n");
 	}
 
+	ret->sock_len = sizeof(ret->sockaddr);
+	memset((char *) &(ret->sockaddr), 0, ret->sock_len);
 	ret->sockaddr.sin_family      = AF_INET;
 	ret->sockaddr.sin_port       = 0;         // Any available port
 	ret->sockaddr.sin_addr.s_addr = INADDR_ANY;
@@ -24,7 +26,7 @@ socket_s* newServerSocket()
 	{
 		fatalErr("Could not get socket info\n");
 	}
-	ret->port = (unsigned)ntohs(ret->sockaddr.sin_port);
+	ret->port = (unsigned)htons(ret->sockaddr.sin_port);
     opt = fcntl(ret->s, F_GETFL);
     if (opt < 0) {
         fatalErr("fcntl(F_GETFL) fail.");

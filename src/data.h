@@ -32,7 +32,30 @@ enum packet_type{
 	NEA
 };
 
-int getPacketSize(void* buf);
+queue*
+newQueue();
+
+void
+addToQueue(void* Packet, int Size, queue* Q, unsigned long int Pr);
+
+void*
+popFromQueue(int* Size, queue* Q);
+
+void*
+/*
+ * Pops element at given position
+ */
+popFromQueue(int* Size, queue* Q, int position);
+
+queue_el*
+/*
+ * Returns the queue_el at the requested position
+ */
+getFromQueue(queue* Q, int position);
+
+int
+getPacketSize(void* buf);
+
 
 
 #endif

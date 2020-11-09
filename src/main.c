@@ -6,12 +6,35 @@ int
 main(int argc, char **argv)
 {
 	//events.sim.out
-	char *network;
-	FILE *f;
-	long fsize;
-	char* network_specs;
-	node* n;
+	int c;
 	int rc;
+	FILE *f;
+	node* n;
+	int pid;
+	long fsize;
+	int node_id;
+	char *network;
+	char* network_specs;
+
+	S.collision = false;
+
+	while (1)
+    {
+		int option_index = 0;
+		static struct option long_options[] = {
+			{"collisions",	no_argument,	0, 'c'},
+			{0,			0,					0,  0 }
+		};
+		c = getopt_long(argc, argv, "c", long_options, &option_index);
+
+		if (c == -1)	break;
+
+		switch(c) {
+			case 'c':
+				S.collision = true;
+				break;
+		}
+	}
 
 	f = fopen("networksetup.sim.in", "r");
     if(f == NULL)
@@ -30,6 +53,19 @@ main(int argc, char **argv)
 	network_specs[fsize] = 0;
 
 	printf("network specs:\n%s", network_specs);
+	// Expected values
+	// X	<-- amount of nodes
+	// M	<-- Master node (node IDs start at 0)
+	// Y0 0	Y0 1	... Y0 X-1
+	// Y1 0	Y1 1	... Y1 X-1
+	//
+	// ...
+	//
+	// YX-1 YX-1 1	... YX-1 X-1
+	//
+	//	^
+	//	|
+	// YA B -> SNR A gets in messages from B
 
 	// Get node ammount and who is the master
 	if((rc =sscanf(network_specs,"%d\n%d\n", &(S.node_ammount), &(S.master))) != 2)
@@ -76,21 +112,52 @@ main(int argc, char **argv)
 
 	printNetwork();
 
-	signal(SIGINT, intHandler);
+	signal(SIGINT, interruptShutdown);
 
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
-		if(rc = pthread_create(&(S.nodes[node_id].thread_handle), NULL, receiver, &(S.nodes[node_id].id)))
+		
+		if(rc = pthread_create(&(S.nodes[node_id].rec_thread_handle), NULL, receiver, &(S.nodes[node_id].id)))
+		{
+			fatalErr("Error: Unable to create thread, %d\n", rc);
+		}
+		
+		if(rc = pthread_create(&(S.nodes[node_id].tra_thread_handle), NULL, transmitter, &(S.nodes[node_id].id)))
 		{
 			fatalErr("Error: Unable to create thread, %d\n", rc);
 		}
 	}
 
+	sleep(1);
+
+	for(node_id = 0; node_id < S.node_ammount; node_id++)
+	{
+		pid = fork();
+		if(!pid)	// Child (node)
+		{
+			char pWS[6];
+			char pHW[6];
+			char pWF_TX[6];
+			char pWF_RX[6];
+			char pIP[6];
+
+			sprintf(pWS, "%d", S.nodes[node_id].WS->port);
+			sprintf(pHW, "%d", S.nodes[node_id].HW->port);
+			sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
+			sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
+			sprintf(pIP, "%d", S.nodes[node_id].IP);
+			printf("%s -q -s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -dlp\n", PATH_TO_NODE, pWS, pHW, pWF_TX, pWF_RX, pIP);
+			execl(PATH_TO_NODE,"-q", "-s", "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-dl", NULL);
+			fatalErr("Could not start node %d\n", node_id);
+		}
+	}
+
+
 	simulator();
 
 }
 
-void intHandler(int dummy) {
+void interruptShutdown(int dummy) {
 	printf("Shutting down simulator\n");
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
@@ -125,66 +192,132 @@ int newIP()
 
 void simulator()
 {
+	int size;
 	void* buf;
 	int bufsize;
 	timespec Res;
+	queue_el* Q_el;
 	bool colided;
+	queue_el* Target_el;
 	unsigned long int Act;
 	unsigned long int intersect_t;
 
-	while(1)
+	size = 0;
+
+	// Wait for at least a single element in queue
+	if(S.collision)
 	{
-		// Wait for at least a single element in queue
-		while(!S.Sent->Size)
+		while(1)
 		{
-			usleep(SIM_DELAY);
-		}
+			while(!S.Sent->Size)
+			{
+				usleep(SIM_DELAY);
+			}
 
-		clock_gettime(CLOCK_REALTIME, &Res);
-		Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
-
-		// Wait to check for collisions
-		if(S.Sent->First->Pr + SIM_DELAY > Act)
-		{
-			usleep(SIM_DELAY - ((Act-S.Sent->First->Pr)/1000));
 			clock_gettime(CLOCK_REALTIME, &Res);
 			Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
-		}
 
-		pthread_mutex_lock(&(S.Lock));
-
-		// Calculate colision based on sent time + time to send per
-		// bit * ammount of bits
-		intersect_t = S.Sent->First->Pr + bufsize*(WF_delay*1000);
-		printf("-------------------------------------\n");
-		printf("\t\t %d messages sent\n", S.Sent->Size);
-
-		colided = false;
-		printf("Analyzing colisions starting at %lu and ending at %lu\n", S.Sent->First->Pr, intersect_t);
-		for(int msg = 1; msg < S.Sent->Size; msg++)
-		{
-			
-			if(getFromQueue(S.Sent, msg) < intersect_t)
+			// Wait to check for collisions
+			// | S.Sent->Last->Pr < intersect_t ??
+			// intersect_t = S.Sent->First->Pr + bufsize*(WF_delay*1000);
+			if(S.Sent->First->Pr + SIM_DELAY > Act)
 			{
-				printf("Colided message %lu \n", getFromQueue(S.Sent, msg));
-				buf = popFromQueue(&bufsize, S.Sent, msg);
-				printMessage(buf, bufsize);
-				msg -= 1;
-			}else{
-				printf("No collision\n");
+				usleep(SIM_DELAY - ((Act-S.Sent->First->Pr)/1000));
+			}
+
+			pthread_mutex_lock(&(S.Lock));
+			size = S.Sent->Size;
+			printf("\n-------------------------------------\n");
+			printf("\t\t %d messages to analyze\n", S.Sent->Size);
+			for(int target = 0; target < size; target++)
+			{
+				// Calculate colision based on sent time + time to send per
+				// bit * ammount of bits
+				Target_el = getFromQueue(S.Sent, target);
+				intersect_t = Target_el->Pr + Target_el->PacketSize*8*(WF_delay*1000);
+				//printf("\t::: %lu\n", Target_el->PacketSize*8*(WF_delay*1000));
+
+				printf("Analyzing colisions starting at %lu and ending at %lu\n", Target_el->Pr, intersect_t);
+				// Check who intersected with target
+				colided = false;
+				for(int msg = target+1; msg < size; msg++)
+				{
+					// Transmission delta intersected
+					// (sent before target finished transmission)
+					Q_el = getFromQueue(S.Sent, msg);
+					if(Q_el->Pr < intersect_t)
+					{
+						printf("Colided message %lu \n", Q_el->Pr);
+						if(Q_el->Packet != NULL)
+						{
+							printMessage(Q_el->Packet, Q_el->PacketSize);
+							free(Q_el->Packet);
+							Q_el->Packet = NULL;
+						}
+						colided = true;
+					}
+					else
+					{
+						printf("No collision %lu   %lu\n", Q_el->Pr, intersect_t);
+					}
+				}
+
+				if(colided && Target_el->Packet != NULL)
+				{
+					printf("Colided message %lu \n", Target_el->Pr);
+					if(Target_el->Packet != NULL)
+					{
+						printMessage(Target_el->Packet, Target_el->PacketSize);
+						free(Target_el->Packet);
+						Target_el->Packet = NULL;
+					}
+				}
+				// Assume that, if we receive a message that has been sent AFTER
+				// the first one stopped transmission, the first one won't interfere
+				// or be interfered by further messages
+				pthread_mutex_unlock(&(S.Lock));
+			}
+			// Check which messages can be forwarded
+			pthread_mutex_lock(&(S.Lock));
+			for(int target = 0; target < size; target++)
+			{
+				Target_el = getFromQueue(S.Sent, target);
+				intersect_t = Target_el->Pr + Target_el->PacketSize*8*(WF_delay*1000);
+				if(intersect_t > S.Sent->Last->Pr)
+				{
+					buf = popFromQueue(&bufsize, S.Sent, target);
+					target -=1;
+					size -= 1;
+					if(buf != NULL)
+					{
+						printf("\tMessage sent successfully %p!\n", buf);
+						for(int node_id = 0; node_id < S.node_ammount; node_id++)
+						{
+							addToQueue(buf, bufsize, S.nodes[node_id].Received, 1);
+						}
+					}
+				}
+			}
+			pthread_mutex_unlock(&(S.Lock));
+		}
+	}
+	else
+	{
+		while(1)
+		{
+			while(!S.Sent->Size)
+			{
+				usleep(SIM_DELAY);
+			}
+			while(S.Sent->Size)
+			{
+				buf = popFromQueue(&bufsize, S.Sent, 0);
+				printf("\tMessage sent successfully!\n");
+				for(int node_id = 0; node_id < S.node_ammount; node_id++)
+				{
+					addToQueue(buf, bufsize, S.nodes[node_id].Received, 1);
+				}
 			}
 		}
-		if(colided)
-		{
-			printf("Colided message\n");
-			buf = popFromQueue(&bufsize, S.Sent);
-			printMessage(buf, bufsize);
-		}
-		while(S.Sent->Size)
-		{
-			buf = popFromQueue(&bufsize, S.Sent);
-		}
-		pthread_mutex_unlock(&(S.Lock));
 	}
-
 }

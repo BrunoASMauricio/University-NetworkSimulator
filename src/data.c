@@ -94,29 +94,6 @@ popFromQueue(int* Size, queue* Q)
 	return Buf;
 }
 
-unsigned long int
-/*
- * Returns the Priority
- */
-getFromQueue(queue* Q, int position)
-{
-	queue_el* helper;
-	pthread_mutex_lock(&(Q->Lock));
-	if(position >= Q->Size || position < 0)
-	{
-		pthread_mutex_unlock(&(Q->Lock));
-		return 0;
-	}
-
-	helper = Q->First;
-	for(int i = 0; i < position; i++)
-	{
-		helper =(queue_el*) helper->NextEl;
-	}
-	pthread_mutex_unlock(&(Q->Lock));
-	return helper->Pr;
-}
-
 void*
 popFromQueue(int* Size, queue* Q, int position)
 {
@@ -131,8 +108,14 @@ popFromQueue(int* Size, queue* Q, int position)
 	}
 	if(!position)
 	{
+		helper= Q->First;
+		Q->First = (queue_el*)Q->First->NextEl;
+		Q->Size -= 1;
+		buf = helper->Packet;
+		*Size = helper->PacketSize;
 		pthread_mutex_unlock(&(Q->Lock));
-		return popFromQueue(Size, Q);
+		free(helper);
+		return buf;
 	}
 
 	helper = Q->First;
@@ -154,6 +137,27 @@ popFromQueue(int* Size, queue* Q, int position)
 	pthread_mutex_unlock(&(Q->Lock));
 	return buf;
 }
+
+queue_el*
+getFromQueue(queue* Q, int position)
+{
+	queue_el* helper;
+	pthread_mutex_lock(&(Q->Lock));
+	if(position >= Q->Size || position < 0)
+	{
+		pthread_mutex_unlock(&(Q->Lock));
+		return NULL;
+	}
+
+	helper = Q->First;
+	for(int i = 0; i < position; i++)
+	{
+		helper =(queue_el*) helper->NextEl;
+	}
+	pthread_mutex_unlock(&(Q->Lock));
+	return helper;
+}
+
 
 void
 delQueue(queue* Q)
