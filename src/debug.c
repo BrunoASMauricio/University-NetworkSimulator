@@ -1,6 +1,43 @@
 #include "debug.h"
 
 void
+printfLog(const char *fmt, ...)
+{
+	va_list args;
+	pthread_t se = pthread_self();
+	if(se == S.main_thread_handle)
+	{
+		va_start(args, fmt);
+		vfprintf(stdout, fmt, args);
+		va_end(args);
+	}
+
+	fprintf(S.events, "[%lu] [!]", se);
+	va_start(args, fmt);
+	vfprintf(S.events, fmt, args);
+	va_end(args);
+}
+
+void
+printfErr(const char *fmt, ...)
+{
+	va_list args;
+	pthread_t se = pthread_self();
+	if(se == S.main_thread_handle)
+	{
+		va_start(args, fmt);
+		vfprintf(stdout, fmt, args);
+		va_end(args);
+	}
+
+	fprintf(S.events, "[%lu] [X]", se);
+	va_start(args, fmt);
+	vfprintf(S.events, fmt, args);
+	va_end(args);
+}
+
+
+void
 fatalErr(const char *fmt, ...)
 {
 	FILE* t;

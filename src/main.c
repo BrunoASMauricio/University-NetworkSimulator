@@ -5,7 +5,6 @@
 int
 main(int argc, char **argv)
 {
-	//events.sim.out
 	int c;
 	int rc;
 	FILE *f;
@@ -17,15 +16,18 @@ main(int argc, char **argv)
 	char* network_specs;
 
 	S.collision = false;
-
+	S.SNR= false;
+	S.main_thread_handle = pthread_self();
+	
 	while (1)
     {
 		int option_index = 0;
 		static struct option long_options[] = {
 			{"collisions",	no_argument,	0, 'c'},
+			{"SNR",		no_argument,		0, 'S'},
 			{0,			0,					0,  0 }
 		};
-		c = getopt_long(argc, argv, "c", long_options, &option_index);
+		c = getopt_long(argc, argv, "cS", long_options, &option_index);
 
 		if (c == -1)	break;
 
@@ -33,11 +35,18 @@ main(int argc, char **argv)
 			case 'c':
 				S.collision = true;
 				break;
+			case 'S':
+				S.SNR= true;
+				break;
 		}
 	}
 
-	f = fopen("networksetup.sim.in", "r");
-    if(f == NULL)
+	if((S.events = fopen("./0.sim", "w")) == NULL)
+	{
+		fatalErr("Could not open event log file\n");
+	}
+
+    if((f = fopen("networksetup.sim.in", "r")) == NULL)
 	{
 		fatalErr("Could not open networksetup.sim.in, make sure it exists and has the right read permissions\n");
 	}
@@ -97,6 +106,8 @@ main(int argc, char **argv)
 				printf("Found incongruence on node %d. Self SNR should be 0\n", node_id);
 			}
 
+			
+
 			if(other_node == S.node_ammount - 1)	// Deal with trailing white spaces
 			{
 				network_specs = strchr(network_specs, '\n')+1;
@@ -126,6 +137,7 @@ main(int argc, char **argv)
 		{
 			fatalErr("Error: Unable to create thread, %d\n", rc);
 		}
+		fprintf(S.events, "%d %lu %lu\n", node_id, S.nodes[node_id].rec_thread_handle, S.nodes[node_id].tra_thread_handle);
 	}
 
 	sleep(1);
@@ -167,6 +179,7 @@ void interruptShutdown(int dummy) {
 		close(S.nodes[node_id].WF_TX->s);
 		close(S.nodes[node_id].WF_RX->s);
 	}
+	fflush(S.events);
 	exit(EXIT_SUCCESS);
 }
 

@@ -23,7 +23,7 @@
 
 typedef uint8_t byte;
 
-typedef int port;
+//typedef int port;
 
 // Holds the node related information
 typedef struct{
@@ -47,7 +47,9 @@ typedef struct{
 	queue* Sent;
 	FILE* events;
 	bool collision;
+	bool SNR;
 	int node_ammount;
+	pthread_t main_thread_handle;
 	pthread_mutex_t Lock;
 }sim;
 

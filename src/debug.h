@@ -3,6 +3,8 @@
 
 #include <stdarg.h>
 
+#define printf printfLog
+
 void
 fatalErr(const char *fmt, ...);
 
