@@ -26,7 +26,7 @@ void* receiver(void* _node_id)
 		}
 		printf("\nGOT %d bytes\n", ReadBytes);
 
-		if(((byte*)buff)[0] & 0x0f == TB && ReadBytes < 144)
+		if(((byte*)buff)[0] & 0x0f == TB && ReadBytes < 18)
 		{
 			PrevBytes = ReadBytes;
 			printf("Got truncated TB\n");
@@ -61,17 +61,20 @@ void* receiver(void* _node_id)
 		pthread_mutex_unlock(&(S.Lock));
 
 		// We received more than one packet
-		if(PacketSize < ReadBytes+PrevBytes)
+		if(PacketSize < ReadBytes + PrevBytes)
 		{
-			printf("\t\tMore than one packet (%d, %d), oh no\n", PacketSize, ReadBytes+PrevBytes);
+			printf("\t\tMore than one packet (%d, %d)\n", PacketSize, ReadBytes+PrevBytes);
 			// Copy the last of the read bytes, to the beggining of the buffer
-			PrevBytes = PacketSize;
-			for(int i = 0; PacketSize+i < ReadBytes; PacketSize++, i++)
+			for(int i = 0; PacketSize + i < ReadBytes + PrevBytes;i++)
 			{
 				buff[i] = buff[PacketSize+i];
 			}
+			PrevBytes = PacketSize - (PrevBytes + ReadBytes);
 		}
-		PrevBytes = 0;
+		else
+		{
+			PrevBytes = 0;
+		}
 
 		//sleep(1);	// For testing purposes
 	}
