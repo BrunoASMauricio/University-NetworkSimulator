@@ -4,7 +4,7 @@ void* transmitter(void* _node_id)
 {
 	int n;
 	pid_t pid;
-	void* buf;
+	inmessage* msg;
 	int bufsize;
 	int node_id;
 	
@@ -27,12 +27,16 @@ void* transmitter(void* _node_id)
 	{
 		while(S.nodes[node_id].Received->Size)
 		{
-			buf = popFromQueue(&bufsize, S.nodes[node_id].Received);
-			while((n = sendToSocket(S.nodes[node_id].WF_RX, buf, bufsize)) == -1)
+			msg = (inmessage*)popFromQueue(&bufsize, S.nodes[node_id].Received);
+			while((n = sendToSocket(S.nodes[node_id].WF_RX, msg->buffer, bufsize)) == -1)
 			{
 				continue;
 			}
-			printf("\t\t .............Message (%d bytes) sent to node!, %d to go\n", n, S.nodes[node_id].Received->Size);
+			while(sendToSocket(S.nodes[node_id].WF_RX, &(S.nodes[node_id].SNR[msg->node_id]), 2) == -1)
+			{
+				continue;
+			}
+			printf("\t\t .............Message (%d bytes) sent to node %d, with SNR %u!, %d to go\n",n , node_id, S.nodes[node_id].SNR[msg->node_id], S.nodes[node_id].Received->Size);
 		}
 		sleep(1);
 	}

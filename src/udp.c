@@ -27,6 +27,7 @@ socket_s* newServerSocket()
 		fatalErr("Could not get socket info\n");
 	}
 	ret->port = (unsigned)htons(ret->sockaddr.sin_port);
+	/*
     opt = fcntl(ret->s, F_GETFL);
     if (opt < 0) {
         fatalErr("fcntl(F_GETFL) fail.");
@@ -35,6 +36,7 @@ socket_s* newServerSocket()
     if (fcntl(ret->s, F_SETFL, opt) < 0) {
         fatalErr("fcntl(F_SETFL) fail.");
     }
+	*/
 	return ret;
 }
 

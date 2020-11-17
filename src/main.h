@@ -28,7 +28,7 @@ typedef uint8_t byte;
 // Holds the node related information
 typedef struct{
 	int id;
-	int* SNR;
+	unsigned short* SNR;
 	int IP;
 	int process_id;
 	pthread_t rec_thread_handle;
@@ -52,6 +52,12 @@ typedef struct{
 	pthread_t main_thread_handle;
 	pthread_mutex_t Lock;
 }sim;
+
+typedef struct{
+	void* buffer;
+	int node_id;
+	int size;
+}inmessage;
 
 sim S;
 

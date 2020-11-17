@@ -11,7 +11,7 @@ void* receiver(void* _node_id)
 
 	char buff[MAX_TRANS_SIZE*2];
 	int PacketSize;
-	void* message;
+	inmessage* message;
 	int ReadBytes = 0;
 	int PrevBytes = 0;
 	unsigned long int arrival;
@@ -24,7 +24,7 @@ void* receiver(void* _node_id)
 		{
 			continue;
 		}
-		printf("\nGOT %d bytes\n", ReadBytes);
+		printf("GOT %d bytes\n", ReadBytes);
 
 		if(((byte*)buff)[0] & 0x0f == TB && ReadBytes < 18)
 		{
@@ -48,12 +48,16 @@ void* receiver(void* _node_id)
 			PrevBytes = ReadBytes;
 			continue;
 		}
+		message = (inmessage*)malloc(sizeof(message));
 
-		message = malloc(PacketSize-8);
-		memcpy(message, buff, PacketSize-8);
+		message->buffer = malloc(PacketSize-8);
+		memcpy(message->buffer, buff, PacketSize-8);
+		message->node_id = node_id;
+		message->size = PacketSize-8;
 		arrival = *((unsigned long int*)(buff+PacketSize-8));
-		//printf("Received from node %d with IP %d at %lu: ", S.nodes[node_id].id, S.nodes[node_id].IP, arrival);
-		//printMessage(buff, ReadBytes+PrevBytes);
+		
+		printf("Received from node %d with IP %d at %lu: ", S.nodes[node_id].id, S.nodes[node_id].IP, arrival);
+		printMessage(buff, ReadBytes+PrevBytes);
 
 
 		pthread_mutex_lock(&(S.Lock));

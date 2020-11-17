@@ -91,12 +91,12 @@ main(int argc, char **argv)
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
 		S.nodes[node_id].id = node_id;
-		S.nodes[node_id].SNR = (int*)malloc(sizeof(int)*(S.node_ammount));
+		S.nodes[node_id].SNR = (unsigned short*)malloc(sizeof(int)*(S.node_ammount));
 		S.nodes[node_id].IP = -1;
 
 		for(int other_node = 0; other_node < S.node_ammount; other_node++)
 		{
-			if((rc = sscanf(network_specs,"%d", &(S.nodes[node_id].SNR[other_node]))) != 1)
+			if((rc = sscanf(network_specs,"%u", &(S.nodes[node_id].SNR[other_node]))) != 1)
 			{
 				fatalErr("Format issue on line %d\n", 3+node_id);
 			}
@@ -152,14 +152,23 @@ main(int argc, char **argv)
 			char pWF_TX[6];
 			char pWF_RX[6];
 			char pIP[6];
+			char isMaster[2] = " ";
 
 			sprintf(pWS, "%d", S.nodes[node_id].WS->port);
 			sprintf(pHW, "%d", S.nodes[node_id].HW->port);
 			sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
 			sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
 			sprintf(pIP, "%d", S.nodes[node_id].IP);
-			printf("%s -q -s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -dlp\n", PATH_TO_NODE, pWS, pHW, pWF_TX, pWF_RX, pIP);
-			execl(PATH_TO_NODE,"-q", "-s", "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-dl", NULL);
+			if(node_id == S.master)
+			{
+				isMaster[0] = 'M';
+			}
+			else
+			{
+				isMaster[0] = 'S';
+			}
+			printf("%s -q -s -r %s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -dlp\n", PATH_TO_NODE, isMaster, pWS, pHW, pWF_TX, pWF_RX, pIP);
+			execl(PATH_TO_NODE,"-q", "-s", "-r", isMaster, "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-dl", NULL);
 			fatalErr("Could not start node %d\n", node_id);
 		}
 	}
@@ -170,6 +179,10 @@ main(int argc, char **argv)
 }
 
 void interruptShutdown(int dummy) {
+	if(pthread_self() != S.main_thread_handle)
+	{
+		return;
+	}
 	printf("Shutting down simulator\n");
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
@@ -180,6 +193,8 @@ void interruptShutdown(int dummy) {
 		close(S.nodes[node_id].WF_RX->s);
 	}
 	fflush(S.events);
+	fflush(stdout);
+	fflush(stderr);
 	exit(EXIT_SUCCESS);
 }
 
@@ -275,14 +290,14 @@ void simulator()
 					}
 				}
 
-				if(colided && Target_el->Packet != NULL)
+				if(colided && ((inmessage*)(Target_el->Packet))->buffer != NULL)
 				{
 					printf("Colided message %lu \n", Target_el->Pr);
-					if(Target_el->Packet != NULL)
+					if(((inmessage*)(Target_el->Packet))->buffer != NULL)
 					{
-						printMessage(Target_el->Packet, Target_el->PacketSize);
-						free(Target_el->Packet);
-						Target_el->Packet = NULL;
+						printMessage(((inmessage*)(Target_el->Packet))->buffer, Target_el->PacketSize);
+						free(((inmessage*)(Target_el->Packet))->buffer);
+						((inmessage*)(Target_el->Packet))->buffer = NULL;
 					}
 				}
 				// Assume that, if we receive a message that has been sent AFTER

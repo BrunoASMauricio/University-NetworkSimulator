@@ -7,10 +7,10 @@ printfLog(const char *fmt, ...)
 	pthread_t se = pthread_self();
 	if(se == S.main_thread_handle)
 	{
-		va_start(args, fmt);
-		vfprintf(stdout, fmt, args);
-		va_end(args);
 	}
+	va_start(args, fmt);
+	vfprintf(stdout, fmt, args);
+	va_end(args);
 
 	fprintf(S.events, "[%lu] [!]", se);
 	va_start(args, fmt);
@@ -25,10 +25,10 @@ printfErr(const char *fmt, ...)
 	pthread_t se = pthread_self();
 	if(se == S.main_thread_handle)
 	{
-		va_start(args, fmt);
-		vfprintf(stdout, fmt, args);
-		va_end(args);
 	}
+	va_start(args, fmt);
+	vfprintf(stdout, fmt, args);
+	va_end(args);
 
 	fprintf(S.events, "[%lu] [X]", se);
 	va_start(args, fmt);
