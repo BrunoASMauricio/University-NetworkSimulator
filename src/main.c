@@ -141,35 +141,59 @@ main(int argc, char **argv)
 	}
 
 	sleep(1);
+	int p1[2];
+	//pipe(p1);
 
 	for(node_id = 0; node_id < S.node_ammount; node_id++)
 	{
 		pid = fork();
-		if(!pid)	// Child (node)
+		// use fork and pipes to mimic shell pipe (stdin -> stdout)
+		if(!pid)	// Child (node) -> ./NP
 		{
-			char pWS[6];
-			char pHW[6];
-			char pWF_TX[6];
-			char pWF_RX[6];
-			char pIP[6];
-			char isMaster[2] = " ";
+			int p2[2];
+			pipe(p2);
 
-			sprintf(pWS, "%d", S.nodes[node_id].WS->port);
-			sprintf(pHW, "%d", S.nodes[node_id].HW->port);
-			sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
-			sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
-			sprintf(pIP, "%d", S.nodes[node_id].IP);
-			if(node_id == S.master)
+			pid = fork();
+			if(!pid)		// Child (monitor) -> NPipe
 			{
-				isMaster[0] = 'M';
+				close(0);		// Close stdin
+				dup(p2[0]);		// On fd 0, (first available), set pipe output
+				execlp("../monitor_pipe/NPipe", NULL);
+				fatalErr("Could not start node %d\n", node_id);
 			}
 			else
 			{
-				isMaster[0] = 'S';
+				close(1);		// Close stdout
+				dup(p2[1]);		// On fd 1, set pipe input
+				char pWS[6];
+				char pHW[6];
+				char pWF_TX[6];
+				char pWF_RX[6];
+				char pIP[6];
+				char isMaster[2] = " ";
+
+				S.nodes[node_id].process_id = pid;
+
+				sprintf(pWS, "%d", S.nodes[node_id].WS->port);
+				sprintf(pHW, "%d", S.nodes[node_id].HW->port);
+				sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
+				sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
+				sprintf(pIP, "%d", S.nodes[node_id].IP);
+				if(node_id == S.master)
+				{
+					isMaster[0] = 'M';
+				}
+				else
+				{
+					isMaster[0] = 'S';
+				}
+				
+				execlp("../protocol/NP", "-s", "-r", isMaster, "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-d", NULL);
+				fatalErr("Could not start node %d\n", node_id);
 			}
-			printf("%s -q -s -r %s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -dlp\n", PATH_TO_NODE, isMaster, pWS, pHW, pWF_TX, pWF_RX, pIP);
-			execl(PATH_TO_NODE,"-q", "-s", "-r", isMaster, "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-dl", NULL);
-			fatalErr("Could not start node %d\n", node_id);
+
+			//printf("/bin/bash -c ../protocol/NP  -s -r %s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -d | ../monitor_pipe/NPipe\n", isMaster, pWS, pHW, pWF_TX, pWF_RX, pIP);
+			// /home/bruno/transport/Documentation/FEUP/TEC/5_Ano/1_Semestre/SETEC/gitlab/protocol/NP
 		}
 	}
 
@@ -318,7 +342,7 @@ void simulator()
 					size -= 1;
 					if(buf != NULL)
 					{
-						printf("\tMessage sent successfully %p!\n", buf);
+						dumpBin((char*)((inmessage*)buf)->buffer, bufsize, "\tMessage sent successfully!\n");
 						for(int node_id = 0; node_id < S.node_ammount; node_id++)
 						{
 							addToQueue(buf, bufsize, S.nodes[node_id].Received, 1);
@@ -340,7 +364,7 @@ void simulator()
 			while(S.Sent->Size)
 			{
 				buf = popFromQueue(&bufsize, S.Sent, 0);
-				printf("\tMessage sent successfully!\n");
+				dumpBin((char*)((inmessage*)buf)->buffer, bufsize, "\tMessage sent successfully!\n");
 				for(int node_id = 0; node_id < S.node_ammount; node_id++)
 				{
 					addToQueue(buf, bufsize, S.nodes[node_id].Received, 1);

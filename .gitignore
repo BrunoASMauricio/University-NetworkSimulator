@@ -2,3 +2,4 @@ sim
 log
 *sim
 fatal
+*.mon.fl
