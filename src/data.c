@@ -1,5 +1,11 @@
 #include "data.h"
 
+float
+randomChance()
+{
+	return (((float)rand()) + ((float)1.0f))/((float)RAND_MAX);
+}
+
 queue*
 newQueue()
 {

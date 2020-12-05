@@ -114,7 +114,7 @@ void printNode(int node_id)
 	printf("\tNode %d (IP: %d)\n", node_id, S.nodes[node_id].IP);
 	for(int other_id = 0; other_id < S.node_ammount; other_id++)
 	{
-		printf("\t\tReceived SNR from node %d is %d\n", other_id, S.nodes[node_id].SNR[other_id]);
+		printf("\t\tReceived SNR from node %d is %f\n", other_id, S.nodes[node_id].Pbe[other_id]);
 	}
 	printf("\tSocket ports:\n");
 	printf("\t\tHW: %d\n",S.nodes[node_id].HW->port);

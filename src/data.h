@@ -32,6 +32,9 @@ enum packet_type{
 	NEA
 };
 
+float
+randomChance();
+
 queue*
 newQueue();
 

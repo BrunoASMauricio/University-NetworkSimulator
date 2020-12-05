@@ -16,18 +16,21 @@ main(int argc, char **argv)
 	char* network_specs;
 
 	S.collision = false;
-	S.SNR= false;
+	S.jitter = false;
+	S.Pbe = false;
 	S.main_thread_handle = pthread_self();
+	srand(time(0));
 	
 	while (1)
     {
 		int option_index = 0;
 		static struct option long_options[] = {
-			{"collisions",	no_argument,	0, 'c'},
-			{"SNR",		no_argument,		0, 'S'},
-			{0,			0,					0,  0 }
+			{"collisions",	no_argument,		0, 'c'},
+			{"jitter",		no_argument,		0, 'j'},
+			{"pbe",			no_argument,		0, 'p'},
+			{0,				0,					0,  0 }
 		};
-		c = getopt_long(argc, argv, "cS", long_options, &option_index);
+		c = getopt_long(argc, argv, "cjp", long_options, &option_index);
 
 		if (c == -1)	break;
 
@@ -35,8 +38,11 @@ main(int argc, char **argv)
 			case 'c':
 				S.collision = true;
 				break;
-			case 'S':
-				S.SNR= true;
+			case 'j':
+				S.jitter = true;
+				break;
+			case 'p':
+				S.Pbe = true;
 				break;
 		}
 	}
@@ -91,19 +97,19 @@ main(int argc, char **argv)
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
 		S.nodes[node_id].id = node_id;
-		S.nodes[node_id].SNR = (unsigned short*)malloc(sizeof(int)*(S.node_ammount));
+		S.nodes[node_id].Pbe= (float*)malloc(sizeof(float)*(S.node_ammount));
 		S.nodes[node_id].IP = -1;
 
 		for(int other_node = 0; other_node < S.node_ammount; other_node++)
 		{
-			if((rc = sscanf(network_specs,"%u", &(S.nodes[node_id].SNR[other_node]))) != 1)
+			if((rc = sscanf(network_specs,"%f", &(S.nodes[node_id].Pbe[other_node]))) != 1)
 			{
 				fatalErr("Format issue on line %d\n", 3+node_id);
 			}
 
-			if(other_node == node_id && S.nodes[node_id].SNR[other_node] != 0)
+			if(other_node == node_id && S.nodes[node_id].Pbe[other_node] != 0)
 			{
-				printf("Found incongruence on node %d. Self SNR should be 0\n", node_id);
+				printf("Found incongruence on node %d. Self Pbe should be 0\n", node_id);
 			}
 
 			
@@ -114,7 +120,7 @@ main(int argc, char **argv)
 			}
 			else
 			{
-				network_specs += 2;
+				network_specs = strchr(network_specs, ' ')+1;
 			}
 		}
 	}
@@ -158,7 +164,7 @@ main(int argc, char **argv)
 			{
 				close(0);		// Close stdin
 				dup(p2[0]);		// On fd 0, (first available), set pipe output
-				execlp("../monitor_pipe/NPipe", NULL);
+				execlp("../MonitorPipe/NPipe", NULL);
 				fatalErr("Could not start node %d\n", node_id);
 			}
 			else
