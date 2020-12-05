@@ -47,6 +47,8 @@ typedef struct{
 	queue* Sent;
 	FILE* events;
 	bool collision;
+	bool SimH;
+	bool SimW;
 	bool Pbe;
 	bool jitter;
 	int node_ammount;

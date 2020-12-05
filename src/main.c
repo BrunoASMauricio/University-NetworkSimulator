@@ -18,6 +18,8 @@ main(int argc, char **argv)
 	S.collision = false;
 	S.jitter = false;
 	S.Pbe = false;
+	S.SimH = false;
+	S.SimW = false;
 	S.main_thread_handle = pthread_self();
 	srand(time(0));
 	
@@ -25,6 +27,8 @@ main(int argc, char **argv)
     {
 		int option_index = 0;
 		static struct option long_options[] = {
+			{"HW",			no_argument,		0, 'h'},
+			{"WS",			no_argument,		0, 'w'},
 			{"collisions",	no_argument,		0, 'c'},
 			{"jitter",		no_argument,		0, 'j'},
 			{"pbe",			no_argument,		0, 'p'},
@@ -44,13 +48,33 @@ main(int argc, char **argv)
 			case 'p':
 				S.Pbe = true;
 				break;
+			case 'h':
+				S.SimH = true;
+				break;
+			case 'w':
+				S.SimW = true;
+				break;
 		}
 	}
 
-	if((S.events = fopen("./0.sim", "w")) == NULL)
+	
+	int p2[2];
+	pipe(p2);
+
+	pid = fork();
+	if(!pid)		// Child (monitor) -> NPipe
 	{
-		fatalErr("Could not open event log file\n");
+		close(0);		// Close stdin
+		dup(p2[0]);		// On fd 0, (first available), set pipe output
+		execlp("../MonitorPipe/NPipe", NULL);
+		fatalErr("There was a problem with the simulators' NPipe\n");
 	}
+	
+	close(1);		// Close stdout
+	dup(p2[1]);		// On fd 1, set pipe input
+	fprintf(stdout, "0\n");
+	fprintf(stdout, "%d\n", getpid());
+	fflush(stdout);
 
     if((f = fopen("networksetup.sim.in", "r")) == NULL)
 	{
@@ -66,6 +90,11 @@ main(int argc, char **argv)
 	fclose(f);
 
 	network_specs[fsize] = 0;
+
+	printf("Simulators:\n");
+	printf("WF = 1 (always)\n");
+	printf("HW = %d\n", S.SimH);
+	printf("WS = %d\n", S.SimW);
 
 	printf("network specs:\n%s", network_specs);
 	// Expected values
@@ -112,8 +141,6 @@ main(int argc, char **argv)
 				printf("Found incongruence on node %d. Self Pbe should be 0\n", node_id);
 			}
 
-			
-
 			if(other_node == S.node_ammount - 1)	// Deal with trailing white spaces
 			{
 				network_specs = strchr(network_specs, '\n')+1;
@@ -143,10 +170,10 @@ main(int argc, char **argv)
 		{
 			fatalErr("Error: Unable to create thread, %d\n", rc);
 		}
-		fprintf(S.events, "%d %lu %lu\n", node_id, S.nodes[node_id].rec_thread_handle, S.nodes[node_id].tra_thread_handle);
+		fprintf(stdout, "%d %lu %lu\n", node_id, S.nodes[node_id].rec_thread_handle, S.nodes[node_id].tra_thread_handle);
 	}
 
-	sleep(1);
+	//sleep(1);
 	int p1[2];
 	//pipe(p1);
 
@@ -167,10 +194,8 @@ main(int argc, char **argv)
 				execlp("../MonitorPipe/NPipe", NULL);
 				fatalErr("Could not start node %d\n", node_id);
 			}
-			else
+			else			// Parent (HW ans WS simulators + protocol)
 			{
-				close(1);		// Close stdout
-				dup(p2[1]);		// On fd 1, set pipe input
 				char pWS[6];
 				char pHW[6];
 				char pWF_TX[6];
@@ -193,10 +218,47 @@ main(int argc, char **argv)
 				{
 					isMaster[0] = 'S';
 				}
-				
+				if(S.SimH || S.SimW)
+				{
+					if(fork())	// Child (simulators)
+					{
+						if(S.SimH ^ S.SimW)	//Only 1 simulator, no need to fork
+						{
+							// Feed 1 extra argument (they assume [0] is the program name)
+							if(S.SimW)	// WS simulator
+							{
+								execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
+								fatalErr("Could not start WS sim for node %d\n", node_id);
+							}
+							else		// HW simulator
+							{
+								execlp("../hw_simulator/hw_sim",  pHW, pHW, NULL);
+								fatalErr("Could not start HW sim for node %d\n", node_id);
+							}
+						}
+						else
+						{
+							if(fork())	// WS simulator
+							{
+
+								execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
+								fatalErr("Could not start WS sim for node %d\n", node_id);
+							}
+							else		// HW simulator
+							{
+								execlp("../hw_simulator/hw_sim",  pHW, pHW, NULL);
+								fatalErr("Could not start HW sim for node %d\n", node_id);
+							}
+						}
+					}
+				}
+				close(1);		// Close stdout
+				dup(p2[1]);		// On fd 1, set pipe input
 				execlp("../protocol/NP", "-s", "-r", isMaster, "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-d", NULL);
+
 				fatalErr("Could not start node %d\n", node_id);
 			}
+			fatalErr("Could not start something %d\n", node_id);
 
 			//printf("/bin/bash -c ../protocol/NP  -s -r %s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -d | ../monitor_pipe/NPipe\n", isMaster, pWS, pHW, pWF_TX, pWF_RX, pIP);
 			// /home/bruno/transport/Documentation/FEUP/TEC/5_Ano/1_Semestre/SETEC/gitlab/protocol/NP
@@ -222,7 +284,6 @@ void interruptShutdown(int dummy) {
 		close(S.nodes[node_id].WF_TX->s);
 		close(S.nodes[node_id].WF_RX->s);
 	}
-	fflush(S.events);
 	fflush(stdout);
 	fflush(stderr);
 	exit(EXIT_SUCCESS);

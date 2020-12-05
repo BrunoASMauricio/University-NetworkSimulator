@@ -8,13 +8,14 @@ printfLog(const char *fmt, ...)
 	if(se == S.main_thread_handle)
 	{
 	}
+	/*
 	va_start(args, fmt);
 	vfprintf(stdout, fmt, args);
 	va_end(args);
-
-	fprintf(S.events, "[%lu] [!]", se);
+	*/
+	fprintf(stdout, "[%lu] [!]", se);
 	va_start(args, fmt);
-	vfprintf(S.events, fmt, args);
+	vfprintf(stdout, fmt, args);
 	va_end(args);
 }
 
@@ -26,14 +27,16 @@ printfErr(const char *fmt, ...)
 	if(se == S.main_thread_handle)
 	{
 	}
+	/*
 	va_start(args, fmt);
 	vfprintf(stdout, fmt, args);
 	va_end(args);
-
-	fprintf(S.events, "[%lu] [X]", se);
+	*/
+	fprintf(stdout, "[%lu] [X]", se);
 	va_start(args, fmt);
-	vfprintf(S.events, fmt, args);
+	vfprintf(stdout, fmt, args);
 	va_end(args);
+	fflush(stdout);
 }
 
 
@@ -48,6 +51,7 @@ fatalErr(const char *fmt, ...)
     vfprintf(stderr, fmt, args);
 	fflush(stderr);
     va_end(args);
+	fflush(stderr);
 
 	exit(EXIT_FAILURE);
 }
