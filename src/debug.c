@@ -121,8 +121,8 @@ void printNode(int node_id)
 		printf("\t\tReceived SNR from node %d is %f\n", other_id, S.nodes[node_id].Pbe[other_id]);
 	}
 	printf("\tSocket ports:\n");
-	printf("\t\tHW: %d\n",S.nodes[node_id].HW->port);
-	printf("\t\tWS: %d\n", S.nodes[node_id].WS->port);
+	//printf("\t\tHW: %d\n",S.nodes[node_id].HW->port);
+	//printf("\t\tWS: %d\n", S.nodes[node_id].WS->port);
 	printf("\t\tWF TX: %d\n", S.nodes[node_id].WF_TX->port);
 	printf("\t\tWF RX: %d\n", S.nodes[node_id].WF_RX->port);
 }

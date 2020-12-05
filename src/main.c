@@ -205,8 +205,11 @@ main(int argc, char **argv)
 
 				S.nodes[node_id].process_id = pid;
 
-				sprintf(pWS, "%d", S.nodes[node_id].WS->port);
-				sprintf(pHW, "%d", S.nodes[node_id].HW->port);
+				//sprintf(pWS, "%d", S.nodes[node_id].WS->port);
+				//sprintf(pHW, "%d", S.nodes[node_id].HW->port);
+				sprintf(pWS, "%d", range(49153, 65534));
+				sprintf(pHW, "%d", range(49153, 65534));
+
 				sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
 				sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
 				sprintf(pIP, "%d", S.nodes[node_id].IP);
@@ -279,8 +282,8 @@ void interruptShutdown(int dummy) {
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
 		kill(S.nodes[node_id].process_id, SIGINT);
-		close(S.nodes[node_id].HW->s);
-		close(S.nodes[node_id].WS->s);
+		//close(S.nodes[node_id].HW->s);
+		//close(S.nodes[node_id].WS->s);
 		close(S.nodes[node_id].WF_TX->s);
 		close(S.nodes[node_id].WF_RX->s);
 	}
@@ -294,8 +297,8 @@ void setupNodes()
 	S.Sent= newQueue();
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
-		S.nodes[node_id].HW = newServerSocket();
-		S.nodes[node_id].WS = newServerSocket();
+		//S.nodes[node_id].HW = newServerSocket();
+		//S.nodes[node_id].WS = newServerSocket();
 		S.nodes[node_id].WF_TX = newServerSocket();
 		S.nodes[node_id].WF_RX = newServerSocket();
 		S.nodes[node_id].IP = newIP();
