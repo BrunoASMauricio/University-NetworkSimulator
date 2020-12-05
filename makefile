@@ -12,7 +12,3 @@ all: NPSimulator
 NPSimulator: ./src/*
 	$(CC) -g -o sim $(FLAGS) ./src/main.c #$(DEBUG)
 
-
-
-
-
