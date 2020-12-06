@@ -220,34 +220,44 @@ main(int argc, char **argv)
 			}
 			if(S.SimH || S.SimW)
 			{
-				if(fork())	// Child (simulators)
+				if(S.master != node_id && S.SimW)		// Non master nodes can only be connected to WS
 				{
-					if(S.SimH ^ S.SimW)	//Only 1 simulator, no need to fork
+					if(fork())
 					{
-						// Feed 1 extra argument (they assume [0] is the program name)
-						if(S.SimW)	// WS simulator
+						execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
+						fatalErr("Could not start WS sim for node %d\n", node_id);
+					}
+				}
+				else
+				{
+					if(fork())	// Child (simulators)
+					{
+						if(S.SimH ^ S.SimW)	//Only 1 simulator, no need to fork
 						{
-							execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
-							fatalErr("Could not start WS sim for node %d\n", node_id);
+							// Feed 1 extra argument (they assume [0] is the program name)
+							if(S.SimW)	// WS simulator
+							{
+								execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
+								fatalErr("Could not start WS sim for node %d\n", node_id);
+							}
+							else		// HW simulator
+							{
+								execlp("../hw_simulator/hw_sim",  pHW, pHW, NULL);
+								fatalErr("Could not start HW sim for node %d\n", node_id);
+							}
 						}
-						else		// HW simulator
+						else
 						{
+							if(fork())	// WS simulator
+							{
+								execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
+								fatalErr("Could not start WS sim for node %d\n", node_id);
+							}
+							else		// HW simulator
+							{
 							execlp("../hw_simulator/hw_sim",  pHW, pHW, NULL);
 							fatalErr("Could not start HW sim for node %d\n", node_id);
-						}
-					}
-					else
-					{
-						if(fork())	// WS simulator
-						{
-
-							execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
-							fatalErr("Could not start WS sim for node %d\n", node_id);
-						}
-						else		// HW simulator
-						{
-						execlp("../hw_simulator/hw_sim",  pHW, pHW, NULL);
-						fatalErr("Could not start HW sim for node %d\n", node_id);
+							}
 						}
 					}
 				}
