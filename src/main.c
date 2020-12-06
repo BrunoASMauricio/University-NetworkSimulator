@@ -179,93 +179,88 @@ main(int argc, char **argv)
 
 	for(node_id = 0; node_id < S.node_ammount; node_id++)
 	{
-		pid = fork();
 		// use fork and pipes to mimic shell pipe (stdin -> stdout)
-		if(!pid)	// Child (node) -> ./NP
+		int p2[2];
+		pipe(p2);
+
+		pid = fork();
+		if(!pid)		// Child (monitor) -> NPipe
 		{
-			int p2[2];
-			pipe(p2);
+			close(0);		// Close stdin
+			dup(p2[0]);		// On fd 0, (first available), set pipe output
+			execlp("../MonitorPipe/NPipe", NULL);
+			fatalErr("Could not start node %d\n", node_id);
+		}
+		else			// Parent (HW ans WS simulators + protocol)
+		{
+			char pWS[6];
+			char pHW[6];
+			char pWF_TX[6];
+			char pWF_RX[6];
+			char pIP[6];
+			char isMaster[2] = " ";
 
-			pid = fork();
-			if(!pid)		// Child (monitor) -> NPipe
+			S.nodes[node_id].process_id = pid;
+
+			//sprintf(pWS, "%d", S.nodes[node_id].WS->port);
+			//sprintf(pHW, "%d", S.nodes[node_id].HW->port);
+			sprintf(pWS, "%d", range(49153, 65534));
+			sprintf(pHW, "%d", range(49153, 65534));
+
+			sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
+			sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
+			sprintf(pIP, "%d", S.nodes[node_id].IP);
+			if(node_id == S.master)
 			{
-				close(0);		// Close stdin
-				dup(p2[0]);		// On fd 0, (first available), set pipe output
-				execlp("../MonitorPipe/NPipe", NULL);
-				fatalErr("Could not start node %d\n", node_id);
+				isMaster[0] = 'M';
 			}
-			else			// Parent (HW ans WS simulators + protocol)
+			else
 			{
-				char pWS[6];
-				char pHW[6];
-				char pWF_TX[6];
-				char pWF_RX[6];
-				char pIP[6];
-				char isMaster[2] = " ";
-
-				S.nodes[node_id].process_id = pid;
-
-				//sprintf(pWS, "%d", S.nodes[node_id].WS->port);
-				//sprintf(pHW, "%d", S.nodes[node_id].HW->port);
-				sprintf(pWS, "%d", range(49153, 65534));
-				sprintf(pHW, "%d", range(49153, 65534));
-
-				sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
-				sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
-				sprintf(pIP, "%d", S.nodes[node_id].IP);
-				if(node_id == S.master)
+				isMaster[0] = 'S';
+			}
+			if(S.SimH || S.SimW)
+			{
+				if(fork())	// Child (simulators)
 				{
-					isMaster[0] = 'M';
-				}
-				else
-				{
-					isMaster[0] = 'S';
-				}
-				if(S.SimH || S.SimW)
-				{
-					if(fork())	// Child (simulators)
+					if(S.SimH ^ S.SimW)	//Only 1 simulator, no need to fork
 					{
-						if(S.SimH ^ S.SimW)	//Only 1 simulator, no need to fork
+						// Feed 1 extra argument (they assume [0] is the program name)
+						if(S.SimW)	// WS simulator
 						{
-							// Feed 1 extra argument (they assume [0] is the program name)
-							if(S.SimW)	// WS simulator
-							{
-								execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
-								fatalErr("Could not start WS sim for node %d\n", node_id);
-							}
-							else		// HW simulator
-							{
-								execlp("../hw_simulator/hw_sim",  pHW, pHW, NULL);
-								fatalErr("Could not start HW sim for node %d\n", node_id);
-							}
+							execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
+							fatalErr("Could not start WS sim for node %d\n", node_id);
 						}
-						else
+						else		// HW simulator
 						{
-							if(fork())	// WS simulator
-							{
+							execlp("../hw_simulator/hw_sim",  pHW, pHW, NULL);
+							fatalErr("Could not start HW sim for node %d\n", node_id);
+						}
+					}
+					else
+					{
+						if(fork())	// WS simulator
+						{
 
-								execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
-								fatalErr("Could not start WS sim for node %d\n", node_id);
-							}
-							else		// HW simulator
-							{
-								execlp("../hw_simulator/hw_sim",  pHW, pHW, NULL);
-								fatalErr("Could not start HW sim for node %d\n", node_id);
-							}
+							execlp("../ws_simulator/ws_sim", pWS, "ws_output", pWS, NULL);
+							fatalErr("Could not start WS sim for node %d\n", node_id);
+						}
+						else		// HW simulator
+						{
+						execlp("../hw_simulator/hw_sim",  pHW, pHW, NULL);
+						fatalErr("Could not start HW sim for node %d\n", node_id);
 						}
 					}
 				}
-				close(1);		// Close stdout
-				dup(p2[1]);		// On fd 1, set pipe input
-				execlp("../protocol/NP", "-s", "-r", isMaster, "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-d", NULL);
-
-				fatalErr("Could not start node %d\n", node_id);
 			}
-			fatalErr("Could not start something %d\n", node_id);
+			close(1);		// Close stdout
+			dup(p2[1]);		// On fd 1, set pipe input
+			execlp("../protocol/NP", "-s", "-r", isMaster, "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-d", NULL);
 
-			//printf("/bin/bash -c ../protocol/NP  -s -r %s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -d | ../monitor_pipe/NPipe\n", isMaster, pWS, pHW, pWF_TX, pWF_RX, pIP);
-			// /home/bruno/transport/Documentation/FEUP/TEC/5_Ano/1_Semestre/SETEC/gitlab/protocol/NP
+			fatalErr("Could not start node %d\n", node_id);
 		}
+		fatalErr("Could not start something %d\n", node_id);
+
+		//printf("/bin/bash -c ../protocol/NP  -s -r %s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -d | ../monitor_pipe/NPipe\n", isMaster, pWS, pHW, pWF_TX, pWF_RX, pIP);
 	}
 
 

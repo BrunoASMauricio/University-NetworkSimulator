@@ -3,4 +3,4 @@ log
 *sim
 fatal
 *.mon.fl
-ws_output.txt
+*.txt
