@@ -262,10 +262,7 @@ main(int argc, char **argv)
 
 		//printf("/bin/bash -c ../protocol/NP  -s -r %s --WS %s --HW %s --WF_TX %s --WF_RX %s -IP %s -d | ../monitor_pipe/NPipe\n", isMaster, pWS, pHW, pWF_TX, pWF_RX, pIP);
 	}
-
-
 	simulator();
-
 }
 
 void interruptShutdown(int dummy) {

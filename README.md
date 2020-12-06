@@ -6,3 +6,11 @@ Also serves as a proof-of-concept testbed.
 
 Final product should consist of a "empowered-node" deploment sytem, capable of 
 simulating all the interfaces needed to test the NP protocol.
+
+Code parameters:
+
+    --WS : Use WS simulator for all nodes
+
+	--HW : Use HW simulator for all nodes
+
+
