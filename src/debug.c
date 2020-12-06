@@ -129,7 +129,7 @@ void printNode(int node_id)
 
 void printNetwork()
 {
-	printf("Printing network status:\n");
+	printf("Printing network status (%lu):\n",getpid());
 	printf("Working with %d nodes. %d is the master node\n", S.node_ammount, S.master);
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{

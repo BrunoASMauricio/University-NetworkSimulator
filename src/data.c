@@ -10,7 +10,6 @@ int
 range(int min, int max)
 {
 	//49152 through 65535
-	printf(">>->>%d\n",(rand() % (max - min + 1)) + min);
 	fflush(stdout);
 	return (rand() % (max - min + 1)) + min;
 }
