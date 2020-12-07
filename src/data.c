@@ -10,7 +10,6 @@ int
 range(int min, int max)
 {
 	//49152 through 65535
-	fflush(stdout);
 	return (rand() % (max - min + 1)) + min;
 }
 
