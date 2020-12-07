@@ -18,7 +18,7 @@ printfLog(const char *fmt, ...)
 	vfprintf(stdout, fmt, args);
 	va_end(args);
 }
-
+/*
 void
 printfErr(const char *fmt, ...)
 {
@@ -27,18 +27,13 @@ printfErr(const char *fmt, ...)
 	if(se == S.main_thread_handle)
 	{
 	}
-	/*
-	va_start(args, fmt);
-	vfprintf(stdout, fmt, args);
-	va_end(args);
-	*/
 	fprintf(stdout, "[%lu] [X]", se);
 	va_start(args, fmt);
 	vfprintf(stdout, fmt, args);
 	va_end(args);
 	fflush(stdout);
 }
-
+*/
 
 void
 fatalErr(const char *fmt, ...)

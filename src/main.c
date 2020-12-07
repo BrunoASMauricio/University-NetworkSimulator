@@ -61,7 +61,7 @@ main(int argc, char **argv)
 	int p2[2];
 	pipe(p2);
 
-	/*
+	
 	pid = fork();
 	if(!pid)		// Child (monitor) -> NPipe
 	{
@@ -76,7 +76,7 @@ main(int argc, char **argv)
 	fprintf(stdout, "0\n");
 	fprintf(stdout, "%d\n", getpid());
 	fflush(stdout);
-	*/
+	
 
     if((f = fopen("networksetup.sim.in", "r")) == NULL)
 	{
