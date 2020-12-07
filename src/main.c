@@ -210,11 +210,6 @@ main(int argc, char **argv)
 				//sprintf(pHW, "%d", S.nodes[node_id].HW->port);
 				sprintf(pWS, "%d", range(49153, 65534));
 				sprintf(pHW, "%d", range(49153, 65534));
-				printf("RANGE %d\n", range(49153, 65534));
-				printf("RANGE %d\n", range(49153, 65534));
-				printf("RANGE %d\n", range(49153, 65534));
-				printf("RANGE %d\n", range(49153, 65534));
-				printf("RANGE %d\n", range(49153, 65534));
 
 				sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
 				sprintf(pWF_RX, "%d", S.nodes[node_id].WF_RX->port);
