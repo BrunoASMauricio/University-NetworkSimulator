@@ -172,7 +172,7 @@ main(int argc, char **argv)
 		{
 			fatalErr("Error: Unable to create thread, %d\n", rc);
 		}
-		fprintf(stdout, "%d %lu %lu\n", node_id, S.nodes[node_id].rec_thread_handle, S.nodes[node_id].tra_thread_handle);
+		fprintf(stdout, "[] %d %lu %lu\n", node_id, S.nodes[node_id].rec_thread_handle, S.nodes[node_id].tra_thread_handle);
 	}
 
 	//sleep(1);
