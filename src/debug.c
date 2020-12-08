@@ -69,7 +69,7 @@ void dumpBin(char* buf, int size, const char *fmt,...)
 
 void printMessage(void* buff, int size)
 {
-	printf("Message (%d bytes):\n\t");
+	printf("Message (%d bytes):\n");
 	switch (((byte*)buff)[0] & 0x0f)
 	{
 		case SD:
