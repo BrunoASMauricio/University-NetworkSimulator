@@ -21,22 +21,27 @@ if [ ! -d "protocol" ]; then
 fi
 
 cd ./MonitorPipe
+rm -f ./NPipe
 make
 cd ..
 
 cd ./ws_simulator
+rm -f ./ws_sim
 make
 cd ..
 
 cd ./hw_simulator
+rm -f ./hw_sim
 make
 cd ..
 
 cd ./simulator
+rm -f ./sim
 make
 cd ..
 
 cd ./protocol
+rm -f ./NP
 make
 cd ..
 
