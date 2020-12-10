@@ -353,9 +353,9 @@ void simulator()
 			}
 
 			pthread_mutex_lock(&(S.Lock));
-			size = S.Sent->Size;
 			printf("\n-------------------------------------\n");
-			printf("\t\t %d messages to analyze\n", S.Sent->Size);
+			size = S.Sent->Size;
+			printf("\t\t %d messages to analyze\n", size);
 			for(int target = 0; target < size; target++)
 			{
 				// Calculate colision based on sent time + time to send per
@@ -374,10 +374,12 @@ void simulator()
 					Q_el = getFromQueue(S.Sent, msg);
 					if(Q_el->Pr < intersect_t)
 					{
-						printf("Colided message %lu \n", Q_el->Pr);
 						if(Q_el->Packet != NULL)
 						{
+							printf("Colided message %lu \n", Q_el->Pr);
 							printMessage(Q_el->Packet, Q_el->PacketSize);
+							free(((inmessage*)(Q_el->Packet))->buffer);
+							((inmessage*)(Q_el->Packet))->buffer = NULL;
 							free(Q_el->Packet);
 							Q_el->Packet = NULL;
 						}
@@ -389,28 +391,30 @@ void simulator()
 					}
 				}
 
-				if(colided && ((inmessage*)(Target_el->Packet))->buffer != NULL)
+				if(colided)
 				{
-					printf("Colided message %lu \n", Target_el->Pr);
-					if(((inmessage*)(Target_el->Packet))->buffer != NULL)
+					if(Target_el->Packet != NULL && ((inmessage*)(Target_el->Packet))->buffer != NULL)
 					{
+						printf("Colided message %lu \n", Target_el->Pr);
 						printMessage(((inmessage*)(Target_el->Packet))->buffer, Target_el->PacketSize);
 						free(((inmessage*)(Target_el->Packet))->buffer);
 						((inmessage*)(Target_el->Packet))->buffer = NULL;
+						free(Target_el->Packet);
+						Target_el->Packet = NULL;
+
 					}
 				}
-				// Assume that, if we receive a message that has been sent AFTER
-				// the first one stopped transmission, the first one won't interfere
-				// or be interfered by further messages
-				pthread_mutex_unlock(&(S.Lock));
 			}
 			// Check which messages can be forwarded
-			pthread_mutex_lock(&(S.Lock));
+			// Assume that, if we receive a message that has been sent AFTER
+			// the first one stopped transmission, the first one won't interfere
+			// or be interfered by further messages
+			printf("\t\t %d messages to collide\n", S.Sent->Size);
 			for(int target = 0; target < size; target++)
 			{
 				Target_el = getFromQueue(S.Sent, target);
 				intersect_t = Target_el->Pr + Target_el->PacketSize*8*(WF_delay*1000);
-				if(intersect_t > S.Sent->Last->Pr)
+				if(intersect_t > S.Sent->Last->Pr || intersect_t > MAX_PACKET_SEND_DELAY)
 				{
 					buf = popFromQueue(&bufsize, S.Sent, target);
 					target -=1;

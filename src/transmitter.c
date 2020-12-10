@@ -34,7 +34,7 @@ void* transmitter(void* _node_id)
 				if(S.Pbe)
 				{
 					float ch = randomChance();
-					if(ch < S.nodes[node_id].Pbe[msg->node_id])
+					if(ch < S.nodes[node_id].Pbe[msg->node_id]*getPacketSize(msg->buffer))
 					{
 						printf("PACKET LOST %f %f\n", ch, S.nodes[node_id].Pbe[msg->node_id]);
 						printMessage(msg->buffer, getPacketSize(msg->buffer));
@@ -50,7 +50,7 @@ void* transmitter(void* _node_id)
 				{
 					continue;
 				}
-				while(sendToSocket(S.nodes[node_id].WF_RX, &(S.nodes[node_id].Pbe[msg->node_id]), 2) == -1)
+				while(sendToSocket(S.nodes[node_id].WF_RX, &(S.nodes[node_id].Pbe[msg->node_id]), 4) == -1)
 				{
 					continue;
 				}

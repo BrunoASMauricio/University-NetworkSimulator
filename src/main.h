@@ -21,6 +21,9 @@
 //#define WF_delay 10	// 10us/bit
 #define WF_delay 60	// 60us/bit
 
+//maximum essage delay inside the simulator in ns
+#define MAX_PACKET_SEND_DELAY 1E7
+
 typedef uint8_t byte;
 
 //typedef int port;

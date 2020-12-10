@@ -121,7 +121,7 @@ popFromQueue(int* Size, queue* Q, int position)
 	}
 	if(!position)
 	{
-		helper= Q->First;
+		helper = Q->First;
 		Q->First = (queue_el*)Q->First->NextEl;
 		Q->Size -= 1;
 		buf = helper->Packet;
@@ -136,6 +136,16 @@ popFromQueue(int* Size, queue* Q, int position)
 	{
 		prev = helper;
 		helper =(queue_el*) helper->NextEl;
+		if(helper == NULL)
+		{
+			printf("Reached the end of the list");
+			return NULL;
+		}
+	}
+	if(helper == NULL)
+	{
+		printf("Reached the end of the list");
+		return NULL;
 	}
 	prev->NextEl = helper->NextEl;
 	if(helper == Q->Last)
