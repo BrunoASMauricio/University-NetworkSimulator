@@ -17,7 +17,7 @@ typedef struct{
 	int Size;
 } queue;
 
-const int Packet_Sizes[11] = {-1, 56/8, 56/8, 80/8, 64/8, 144/8, 56/8, 40/8, 40/8, 40/8, 40/8};
+const int Packet_Sizes[11] = {-1, 56/8, 56/8, 104/8, 88/8, 144/8, 56/8, 40/8, 40/8, 40/8, 40/8};
 
 enum packet_type{
 	SD = 1,

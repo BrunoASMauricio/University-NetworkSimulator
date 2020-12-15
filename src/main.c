@@ -284,8 +284,11 @@ void interruptShutdown(int dummy) {
 		return;
 	}
 	printf("Shutting down simulator\n");
+	// Kill whole process group. Not sure if this works
+	//kill(0,SIGINT);
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
+		printf("Shutting down node %d\n", node_id);
 		kill(S.nodes[node_id].process_id, SIGINT);
 		//close(S.nodes[node_id].HW->s);
 		//close(S.nodes[node_id].WS->s);
