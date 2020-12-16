@@ -208,7 +208,7 @@ main(int argc, char **argv)
 
 				//sprintf(pWS, "%d", S.nodes[node_id].WS->port);
 				//sprintf(pHW, "%d", S.nodes[node_id].HW->port);
-				sprintf(pWS, "%d", range(49153, 65534));
+				sprintf(pWS, "%d", 23092);//range(49153, 65534));
 				sprintf(pHW, "%d", range(49153, 65534));
 
 				sprintf(pWF_TX, "%d", S.nodes[node_id].WF_TX->port);
