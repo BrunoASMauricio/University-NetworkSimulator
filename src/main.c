@@ -328,6 +328,7 @@ void simulator()
 	timespec Res;
 	queue_el* Q_el;
 	bool colided;
+	inmessage* inmsg;
 	queue_el* Target_el;
 	unsigned long int Act;
 	unsigned long int intersect_t;
@@ -364,7 +365,7 @@ void simulator()
 				// Calculate colision based on sent time + time to send per
 				// bit * ammount of bits
 				Target_el = getFromQueue(S.Sent, target);
-				intersect_t = Target_el->Pr + Target_el->PacketSize*8*(WF_delay*1000);
+				intersect_t = Target_el->Pr + Target_el->PacketSize*8*WF_delay;
 				//printf("\t::: %lu\n", Target_el->PacketSize*8*(WF_delay*1000));
 
 				printf("Analyzing colisions starting at %lu and ending at %lu\n", Target_el->Pr, intersect_t);
@@ -375,35 +376,33 @@ void simulator()
 					// Transmission delta intersected
 					// (sent before target finished transmission)
 					Q_el = getFromQueue(S.Sent, msg);
-					if(Q_el->Pr < intersect_t)
+					inmsg = (inmessage*)(Q_el->Packet);
+					if(Q_el->Pr < intersect_t && ((inmessage*)(Target_el->Packet))->node_id != inmsg->node_id)
 					{
-						if(Q_el->Packet != NULL)
+						if(inmsg->buffer != NULL)
 						{
-							printf("Colided message %lu \n", Q_el->Pr);
-							printMessage(Q_el->Packet, Q_el->PacketSize);
-							free(((inmessage*)(Q_el->Packet))->buffer);
-							((inmessage*)(Q_el->Packet))->buffer = NULL;
-							free(Q_el->Packet);
-							Q_el->Packet = NULL;
+							printf("Colided message %lu from %d\n", Q_el->Pr, inmsg->node_id);
+							printMessage(inmsg->buffer, inmsg->size);
+							free(inmsg->buffer);
+							inmsg->buffer = NULL;
+							//free(Q_el->Packet);
+							//Q_el->Packet = NULL;
 						}
 						colided = true;
-					}
-					else
-					{
-						printf("No collision %lu   %lu\n", Q_el->Pr, intersect_t);
 					}
 				}
 
 				if(colided)
 				{
-					if(Target_el->Packet != NULL && ((inmessage*)(Target_el->Packet))->buffer != NULL)
+					inmsg = (inmessage*)(Target_el->Packet);
+					if(inmsg->buffer != NULL)
 					{
-						printf("Colided message %lu \n", Target_el->Pr);
-						printMessage(((inmessage*)(Target_el->Packet))->buffer, Target_el->PacketSize);
-						free(((inmessage*)(Target_el->Packet))->buffer);
-						((inmessage*)(Target_el->Packet))->buffer = NULL;
-						free(Target_el->Packet);
-						Target_el->Packet = NULL;
+						printf("Colided message %lu from %d\n", Target_el->Pr, inmsg->node_id);
+						printMessage(inmsg->buffer, inmsg->size);
+						free(inmsg->buffer);
+						inmsg->buffer = NULL;
+						//free(Target_el->Packet);
+						//Target_el->Packet = NULL;
 
 					}
 				}
@@ -416,13 +415,13 @@ void simulator()
 			for(int target = 0; target < size; target++)
 			{
 				Target_el = getFromQueue(S.Sent, target);
-				intersect_t = Target_el->Pr + Target_el->PacketSize*8*(WF_delay*1000);
+				intersect_t = Target_el->Pr + Target_el->PacketSize*8*WF_delay;
 				if(intersect_t > S.Sent->Last->Pr || intersect_t > MAX_PACKET_SEND_DELAY)
 				{
 					buf = popFromQueue(&bufsize, S.Sent, target);
 					target -=1;
 					size -= 1;
-					if(buf != NULL)
+					if(buf != NULL && ((inmessage*)buf)->buffer != NULL)
 					{
 						dumpBin((char*)((inmessage*)buf)->buffer, bufsize, "\tMessage sent successfully!\n");
 						for(int node_id = 0; node_id < S.node_ammount; node_id++)
@@ -430,6 +429,7 @@ void simulator()
 							addToQueue(buf, bufsize, S.nodes[node_id].Received, 1);
 						}
 					}
+					
 				}
 			}
 			pthread_mutex_unlock(&(S.Lock));

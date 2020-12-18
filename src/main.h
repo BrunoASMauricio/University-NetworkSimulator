@@ -15,14 +15,14 @@
 #include "data.h"
 
 #define SAMPLE_SIZE 16
-// Simulatorr delay in us
-#define SIM_DELAY 1E6	//1 s
-// WF delay per bit in us
+// Simulator delay in us
+#define SIM_DELAY 1E5	//1 s
 //#define WF_delay 10	// 10us/bit
-#define WF_delay 60	// 60us/bit
+// WF delay per bit in ns
+#define WF_delay ((unsigned long int)(3*1E4)) // 30us/bit
 
-//maximum essage delay inside the simulator in ns
-#define MAX_PACKET_SEND_DELAY 1E7
+//maximum message delay inside the simulator in ns
+#define MAX_PACKET_SEND_DELAY 1E6
 
 typedef uint8_t byte;
 
