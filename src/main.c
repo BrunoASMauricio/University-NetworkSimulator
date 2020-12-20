@@ -57,6 +57,10 @@ main(int argc, char **argv)
 		}
 	}
 
+	if (pthread_mutex_init(&(S.OutputLock), NULL) != 0)
+    {
+        fatalErr("mutex init failed for outbound lock\n");
+    }
 	
 	int p2[2];
 	pipe(p2);

@@ -57,6 +57,7 @@ typedef struct{
 	int node_ammount;
 	pthread_t main_thread_handle;
 	pthread_mutex_t Lock;
+	pthread_mutex_t OutputLock;
 }sim;
 
 typedef struct{
