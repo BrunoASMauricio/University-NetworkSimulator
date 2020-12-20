@@ -54,8 +54,13 @@ fatalErr(const char *fmt, ...)
 void dumpBin(char* buf, int size, const char *fmt,...)
 {
 	va_list args;
-    va_start(args, fmt);
-    vfprintf(stdout, fmt, args);
+	pthread_t se = pthread_self();
+
+	fprintf(stdout, "[%lu] [!]", se);
+	va_start(args, fmt);
+	vfprintf(stdout, fmt, args);
+	va_end(args);
+
 
 	for(int i = 0; i < size; i++)
     {
