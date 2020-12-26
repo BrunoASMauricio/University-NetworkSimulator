@@ -23,7 +23,12 @@ void* transmitter(void* _node_id)
 	{
 		continue;
 	}
-
+	
+	// Start the actions
+	if(S.edges)
+	{
+		actionActive(node_id);
+	}
 	while(1)
 	{
 		while(S.nodes[node_id].Received->Size)

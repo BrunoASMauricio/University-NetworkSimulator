@@ -109,5 +109,6 @@ simulator();
 #include "receiver.c"
 #include "transmitter.c"
 #include "edge_cases.c"
+#include "node.c"
 
 #endif
