@@ -33,7 +33,23 @@ Note:
 
 X.sim.in
 
+STATE0	X0 Y0
 
+STATE1	X1 Y1
+
+...
+
+SATEK	XK YK
+
+STATE = Outside | Waiting | Inside
+X = Delay from when the state is first reached, to when the blocking action begins in seconds
+Y = Duration of the blocking action in seconds
+
+The way the simulator interprets the file, is sequentially.
+
+The simulator waits until the first action elapses, to execute the second one.
+
+This means that if the first actions' state is Inside, and the second actions' state is Outside, the simulator will wait until the node is Inside, perform the action for its' duration, and then wait until the node is considered Outside once again. This may never happen unless other actions on other nodes make it so.
 
 
 Code parameters:
@@ -49,5 +65,7 @@ Code parameters:
 	--pbe/-p :	Uses the network.sim.in to retrieve the Bit Error Probability from each node, to each other node
 		
 	--jitter/-j:	Adds the default jitter to the communications (NOT IMPLEMENTED)
+
+	--edges/-e:		Makes the simulator enforce the rules on the given X.sim.in files
 
 

@@ -14,6 +14,9 @@
 #include "udp.c"
 #include "data.h"
 
+
+#include "edge_cases.h"
+
 #define SAMPLE_SIZE 16
 // Simulator delay in us
 #define SIM_DELAY 1E5	//1 s
@@ -27,27 +30,6 @@
 typedef uint8_t byte;
 
 //typedef int port;
-enum state{
-	Outside = 0,
-	Waiting,
-	Inside
-};
-
-/*
- * How many (start) ns after switching to a
- * state (state), should the messages be blocked,
- * and after how many (end) ns to stop
- */
-typedef struct{
-	unsigned long int delay;	// Time from entering stage, and engaging action
-	unsigned long int duration;		// Time from start of action, to end
-	unsigned int state;			// Start State
-}action;
-
-typedef struct{
-	action* actions;
-	int action_amm;
-}edge_case;
 
 // Holds the node related information
 typedef struct{
@@ -63,6 +45,7 @@ typedef struct{
 	socket_s* WS;
 	queue* Received;
 	edge_case* Edge;
+	byte state;
 }node;
 
 // Holds simulator information

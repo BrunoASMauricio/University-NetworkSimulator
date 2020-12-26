@@ -41,6 +41,13 @@ void* transmitter(void* _node_id)
 						will_send = false;
 					}
 				}
+				if(S.edges && will_send)
+				{
+					if(actionActive(node_id))
+					{
+						will_send = false;
+					}
+				}
 				if(!will_send)
 				{
 					continue;

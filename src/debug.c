@@ -19,6 +19,7 @@ printfLog(const char *fmt, ...)
 	vfprintf(stdout, fmt, args);
 	pthread_mutex_unlock(&(S.OutputLock));
 	va_end(args);
+	fflush(stdout);
 }
 /*
 void
@@ -73,6 +74,7 @@ void dumpBin(char* buf, int size, const char *fmt,...)
 	pthread_mutex_unlock(&(S.OutputLock));
 
 	va_end(args);
+	fflush(stdout);
 }
 
 void printMessage(void* buff, int size)

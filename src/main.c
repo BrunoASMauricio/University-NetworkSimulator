@@ -141,7 +141,19 @@ main(int argc, char **argv)
 		S.nodes[node_id].IP = -1;
 		if(S.edges)
 		{
-			S.nodes[node_id].Edge = getEdgeRules(node_id);
+			S.nodes[node_id].Edge = getEdgeActions(node_id);
+			if(S.nodes[node_id].Edge)
+			{
+				S.nodes[node_id].Edge->current = 0;
+			}
+			if(node_id == S.master)
+			{
+				S.nodes[node_id].state = 1;
+			}
+			else
+			{
+				S.nodes[node_id].state = 0;
+			}
 		}
 		
 		// Get node SNRs
