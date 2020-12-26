@@ -13,9 +13,11 @@ printfLog(const char *fmt, ...)
 	vfprintf(stdout, fmt, args);
 	va_end(args);
 	*/
-	fprintf(stdout, "[%lu] [!]", se);
 	va_start(args, fmt);
+	pthread_mutex_lock(&(S.OutputLock));
+	fprintf(stdout, "[%lu] [!]", se);
 	vfprintf(stdout, fmt, args);
+	pthread_mutex_unlock(&(S.OutputLock));
 	va_end(args);
 }
 /*
@@ -54,8 +56,13 @@ fatalErr(const char *fmt, ...)
 void dumpBin(char* buf, int size, const char *fmt,...)
 {
 	va_list args;
-    va_start(args, fmt);
-    vfprintf(stdout, fmt, args);
+	pthread_t se = pthread_self();
+
+	va_start(args, fmt);
+
+	pthread_mutex_lock(&(S.OutputLock));
+	fprintf(stdout, "[%lu] [!]", se);
+	vfprintf(stdout, fmt, args);
 
 	for(int i = 0; i < size; i++)
     {
@@ -63,6 +70,7 @@ void dumpBin(char* buf, int size, const char *fmt,...)
 	}
 
 	fprintf(stdout, "\n");
+	pthread_mutex_unlock(&(S.OutputLock));
 
 	va_end(args);
 }
