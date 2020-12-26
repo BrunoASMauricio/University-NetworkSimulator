@@ -41,7 +41,7 @@ STATE1	X1 Y1
 
 SATEK	XK YK
 
-STATE = Outside | Waiting | Inside
+STATE = 0 (Outside) | 1 (Waiting) | 2 (Inside)
 X = Delay from when the state is first reached, to when the blocking action begins in seconds
 Y = Duration of the blocking action in seconds
 
