@@ -20,6 +20,7 @@ main(int argc, char **argv)
 	S.Pbe = false;
 	S.SimH = false;
 	S.SimW = false;
+	S.edges = false;
 	S.main_thread_handle = pthread_self();
 	srand(time(0));
 	
@@ -32,9 +33,10 @@ main(int argc, char **argv)
 			{"collisions",	no_argument,		0, 'c'},
 			{"jitter",		no_argument,		0, 'j'},
 			{"pbe",			no_argument,		0, 'p'},
+			{"edges",		no_argument,		0, 'e'},
 			{0,				0,					0,  0 }
 		};
-		c = getopt_long(argc, argv, "cjp", long_options, &option_index);
+		c = getopt_long(argc, argv, "hwcjpe", long_options, &option_index);
 
 		if (c == -1)	break;
 
@@ -53,6 +55,9 @@ main(int argc, char **argv)
 				break;
 			case 'w':
 				S.SimW = true;
+				break;
+			case 'e':
+				S.edges = true;
 				break;
 		}
 	}
@@ -128,15 +133,25 @@ main(int argc, char **argv)
 
 	S.nodes = (node*)malloc(sizeof(node)*S.node_ammount);
 
-	// Get node SNRs
+	// Setup node data
 	for(int node_id = 0; node_id < S.node_ammount; node_id++)
 	{
 		S.nodes[node_id].id = node_id;
 		S.nodes[node_id].Pbe= (float*)malloc(sizeof(float)*(S.node_ammount));
 		S.nodes[node_id].IP = -1;
-
+		if(S.edges)
+		{
+			S.nodes[node_id].Edge = getEdgeRules(node_id);
+		}
+		
+		// Get node SNRs
 		for(int other_node = 0; other_node < S.node_ammount; other_node++)
 		{
+			if(!S.Pbe)
+			{
+				S.nodes[node_id].Pbe[other_node] = 0;
+				continue;
+			}
 			if((rc = sscanf(network_specs,"%f", &(S.nodes[node_id].Pbe[other_node]))) != 1)
 			{
 				fatalErr("Format issue on line %d\n", 3+node_id);

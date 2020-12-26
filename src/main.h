@@ -27,6 +27,27 @@
 typedef uint8_t byte;
 
 //typedef int port;
+enum state{
+	Outside = 0,
+	Waiting,
+	Inside
+};
+
+/*
+ * How many (start) ns after switching to a
+ * state (state), should the messages be blocked,
+ * and after how many (end) ns to stop
+ */
+typedef struct{
+	unsigned long int delay;	// Time from entering stage, and engaging action
+	unsigned long int duration;		// Time from start of action, to end
+	unsigned int state;			// Start State
+}action;
+
+typedef struct{
+	action* actions;
+	int action_amm;
+}edge_case;
 
 // Holds the node related information
 typedef struct{
@@ -41,6 +62,7 @@ typedef struct{
 	socket_s* HW;
 	socket_s* WS;
 	queue* Received;
+	edge_case* Edge;
 }node;
 
 // Holds simulator information
@@ -50,6 +72,7 @@ typedef struct{
 	queue* Sent;
 	FILE* events;
 	bool collision;
+	bool edges;
 	bool SimH;
 	bool SimW;
 	bool Pbe;
@@ -102,5 +125,6 @@ simulator();
 #include "data.c"
 #include "receiver.c"
 #include "transmitter.c"
+#include "edge_cases.c"
 
 #endif

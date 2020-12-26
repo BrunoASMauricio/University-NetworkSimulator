@@ -4,9 +4,14 @@ The WF simulator.
 
 Simulates message exchange between nodes.
 
-Can simulate message loss and temporal collision
+Can simulate message loss, temporal collision and transmission jitter (NOT IMPLEMENTED).
+
+Can force edge cases to happen by performing user-defined message blocking actions, based on perceived protocol state and the given time intervals.
 
 Reads network.sim.in to setup nodes and their communications.
+
+Reads X.sim.in to retrieve actions to perform on node X.
+
 
 network.sim.in
 
@@ -26,6 +31,10 @@ YA,B -> Bit error probability from a message sent from B, and received by A
 Note:
 	The Yk,k values should always be 0 (node receives all it's sent messages), since this is a worst case scenario.
 
+X.sim.in
+
+
+
 
 Code parameters:
 
@@ -39,5 +48,6 @@ Code parameters:
 
 	--pbe/-p :	Uses the network.sim.in to retrieve the Bit Error Probability from each node, to each other node
 		
+	--jitter/-j:	Adds the default jitter to the communications (NOT IMPLEMENTED)
 
 
