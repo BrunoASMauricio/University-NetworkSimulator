@@ -46,6 +46,7 @@ typedef struct{
 	queue* Received;
 	edge_case* Edge;
 	byte state;
+	bool up;
 }node;
 
 // Holds simulator information

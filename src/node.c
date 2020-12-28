@@ -3,15 +3,15 @@
 void nodeOn(int node_id)
 {
 	int pid;
-	if(!fork())
+	printf("Starting node %d\n", node_id);
+	pid = fork();
+	if(!pid)
 	{
-		printf("Starting node %d\n", node_id);
 		// use fork and pipes to mimic shell pipe (stdin -> stdout)
 		int p2[2];
 		pipe(p2);
 
-		pid = fork();
-		if(!pid)		// Child (monitor) -> NPipe
+		if(!fork())		// Child (monitor) -> NPipe
 		{
 			close(0);		// Close stdin
 			dup(p2[0]);		// On fd 0, (first available), set pipe output
@@ -27,8 +27,6 @@ void nodeOn(int node_id)
 			char pWF_RX[6];
 			char pIP[6];
 			char isMaster[2] = " ";
-
-			S.nodes[node_id].process_id = pid;
 
 			//sprintf(pWS, "%d", S.nodes[node_id].WS->port);
 			//sprintf(pHW, "%d", S.nodes[node_id].HW->port);
@@ -98,4 +96,14 @@ void nodeOn(int node_id)
 		}
 		fatalErr("Could not start something %d\n", node_id);
 	}
+	S.nodes[node_id].process_id = pid;
+	S.nodes[node_id].up = true;
+}
+
+
+void nodeOff(int node_id)
+{
+	printf("Killing node %d\n", node_id);
+	kill(S.nodes[node_id].process_id, SIGINT);
+	S.nodes[node_id].up = false;
 }

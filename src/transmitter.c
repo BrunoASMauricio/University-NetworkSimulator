@@ -19,10 +19,12 @@ void* transmitter(void* _node_id)
 	// Everywhere I looked, client always spoke first
 	// Always found "in UDP it doesn't matter who talks first"
 	// But if the client doesn't send a ping, it doesn't work
+	/*
 	while((n = getFromSocket(S.nodes[node_id].WF_RX, testbuf)) == -1)
 	{
 		continue;
 	}
+	*/
 	
 	// Start the actions
 	if(S.edges)

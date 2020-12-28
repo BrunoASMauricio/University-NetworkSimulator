@@ -17,7 +17,7 @@ typedef struct{
 	unsigned int port;
 }socket_s;
 
-socket_s* newSocket(int port);
+socket_s* newSocket(unsigned short port);
 void startSocket(socket_s* sk);
 
 #endif

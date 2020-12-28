@@ -2,11 +2,18 @@
 #define EDGE
 
 #include "main.h"
+#include "node.h"
 
 enum state{
 	Outside = 0,
 	Waiting,
 	Inside
+};
+
+enum action_type{
+	Deafen = 0,		// Node does not receive messages while the action is active
+	Mute,			// Node does not transmit messages while the action is active
+	Shutdown,		// Node is offline while the action is active
 };
 
 /*
@@ -19,6 +26,7 @@ typedef struct{
 	unsigned long int duration;		// Time from start of action, to end
 	int state;			// Start State, -1 is any state
 	unsigned long int started;
+	action_type type;
 }action;
 
 typedef struct{

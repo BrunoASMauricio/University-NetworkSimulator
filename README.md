@@ -6,7 +6,7 @@ Simulates message exchange between nodes.
 
 Can simulate message loss, temporal collision and transmission jitter (NOT IMPLEMENTED).
 
-Can force edge cases to happen by performing user-defined message blocking actions, based on perceived protocol state and the given time intervals.
+Can force edge cases to happen by performing user-defined actions, based on perceived protocol state and the given time intervals.
 
 Reads network.sim.in to setup nodes and their communications.
 
@@ -33,17 +33,31 @@ Note:
 
 X.sim.in
 
-STATE0	X0 Y0
+STATE0 X0 Y0 Z0
 
-STATE1	X1 Y1
+STATE1 X1 Y1 Z1
 
 ...
 
-SATEK	XK YK
+SATEK XK YK ZK
 
-STATE = 0 (Outside) | 1 (Waiting) | 2 (Inside)
+STATE = -1 (Any) | 0 (Outside) | 1 (Waiting) | 2 (Inside)
+
 X = Delay from when the state is first reached, to when the blocking action begins in seconds
 Y = Duration of the blocking action in seconds
+
+Z = Action specification number that is evaluated bit by bit. The "action" occurs for the specified duration.
+
+1XXX XXXX	Deafen (Node does not receive any message)
+
+X1XX XXXX	Mute (Node does not transmit any message)
+
+XX1X XXXX	Shutdown	(Node is shutdown, and afterwards brought back up)
+
+				(Messages are still sent to it)
+
+Example: 3 Deafens AND mutes the node.
+
 
 The way the simulator interprets the file, is sequentially.
 

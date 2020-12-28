@@ -245,7 +245,8 @@ void setupNodes()
 		//S.nodes[node_id].HW = newServerSocket();
 		//S.nodes[node_id].WS = newServerSocket();
 		S.nodes[node_id].WF_TX = newServerSocket();
-		S.nodes[node_id].WF_RX = newServerSocket();
+		S.nodes[node_id].WF_RX = newSocket(range(49153, 65534));
+		startSocket(S.nodes[node_id].WF_RX);
 		S.nodes[node_id].IP = newIP();
 	}
 

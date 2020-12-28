@@ -31,17 +31,16 @@ edge_case* getEdgeActions(int node_id)
 	act = ret->actions;
 	actual_actions = 0;
 	printf("Rules:\n");
-	while((rc=fscanf(f, "%d %lu %lu\n", &(act->state), &(delay), &(duration))) != EOF && rc == 3)
+	while((rc=fscanf(f, "%d %lu %lu %u", &(act->state), &(delay), &(duration), &(act->type))) != EOF && rc == 4)
 	{
 		act->delay = delay*(int64_t)1000000000UL;
 		act->duration = duration*(int64_t)1000000000UL;
-		printf("State: %d\nStart: %lus\nDuration: %lus\n", act->state, act->delay, act->duration);
+		printf("State: %d\nStart: %lus\nDuration: %lus\nAction: %u\n", act->state, act->delay, act->duration, act->type);
 		act->started = 0;
 		act += sizeof(action*);
 		actual_actions++;
+		fscanf(f, "\n");
 	}
-
-
 	return ret;
 }
 
@@ -53,7 +52,8 @@ bool actionActive(int node_id)
 	node* n = &(S.nodes[node_id]);
 	printf("Action Active? %d\n",node_id);fflush(stdout);
 	edge_case* e = n->Edge;
-	if(!e)
+	// No actions left (ended or never where)
+	if(!e || e->action_amm == e->current)
 	{
 		return false;
 	}
@@ -83,17 +83,26 @@ bool actionActive(int node_id)
 	// On a separate if to handle "delay = 0"
 	if(cur_act->started && cur > cur_act->started+cur_act->delay)
 	{
-		printf("Action started\n");fflush(stdout);
+		printf("Action started\n");
 		// End action?
 		if(cur > cur_act->started+cur_act->delay+cur_act->duration)
 		{
-			printf("Action ended\n");fflush(stdout);
+			printf("Action ended\n");
+			if(CHECKBIT(Shutdown, cur_act->type))
+			{
+				nodeOn(node_id);
+			}
 			e->current += 1;
 			return false;
 		}
 		else
 		{
 			printf("Message blocked by rule %d\n",e->current);
+			if(S.nodes[node_id].up && CHECKBIT(Shutdown, cur_act->type))
+			{
+				nodeOff(node_id);
+			}
+
 			return true;
 		}
 	}
