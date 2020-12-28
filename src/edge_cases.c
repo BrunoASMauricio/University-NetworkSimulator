@@ -53,7 +53,7 @@ bool actionActive(int node_id)
 	printf("Action Active? %d\n",node_id);fflush(stdout);
 	edge_case* e = n->Edge;
 	// No actions left (ended or never where)
-	if(!e || e->action_amm == e->current)
+	if(!S.edges || !e || e->action_amm == e->current)
 	{
 		return false;
 	}

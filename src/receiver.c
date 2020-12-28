@@ -41,7 +41,7 @@ void* receiver(void* _node_id)
 		assert(ReadBytes == 8);
 		arrival = *((unsigned long int*)(buff));
 		// Check action
-		if(n->Edge && n->Edge->current != n->Edge->action_amm)
+		if(S.edges && n->Edge && n->Edge->current != n->Edge->action_amm)
 		{
 			cur_act = &(n->Edge->actions[n->Edge->current]);
 			if(actionActive(node_id) && CHECKBIT(Mute, cur_act->type))

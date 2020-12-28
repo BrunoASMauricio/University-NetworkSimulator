@@ -40,10 +40,10 @@ void* transmitter(void* _node_id)
 			msg = (inmessage*)popFromQueue(&bufsize, S.nodes[node_id].Received);
 
 			if(msg->node_id != node_id){
-				if(n->Edge && n->Edge->current != n->Edge->action_amm)
+				if(S.edges && n->Edge && n->Edge->current != n->Edge->action_amm)
 				{
 					cur_act = &(n->Edge->actions[n->Edge->current]);
-					if(actionActive(node_id) && CHECKBIT(Mute, cur_act->type))
+					if(actionActive(node_id) && CHECKBIT(Deafen, cur_act->type))
 					{
 						printf("Deafening message for %d\n", node_id);
 						printMessage(msg->buffer, msg->size);
@@ -59,13 +59,6 @@ void* transmitter(void* _node_id)
 					{
 						printf("PACKET LOST %f %f\n", ch, S.nodes[node_id].Pbe[msg->node_id]);
 						printMessage(msg->buffer, getPacketSize(msg->buffer));
-						will_send = false;
-					}
-				}
-				if(S.edges && will_send)
-				{
-					if(actionActive(node_id))
-					{
 						will_send = false;
 					}
 				}
