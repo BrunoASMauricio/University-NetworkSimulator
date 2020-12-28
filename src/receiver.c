@@ -6,6 +6,7 @@ void* receiver(void* _node_id)
 {
 	int node_id;
 	pid_t pid;
+	action* cur_act;
 	
 	node_id	= *((int*)_node_id);
 
@@ -15,12 +16,13 @@ void* receiver(void* _node_id)
 	int ReadBytes = 0;
 	//int PrevBytes = 0;
 	unsigned long int arrival;
+	node* n = &(S.nodes[node_id]);
 
-	S.nodes[node_id].process_id = pid;
-	printf("Started receiver thread for node %d on %u\n", node_id, S.nodes[node_id].WF_TX->port);
+	n->process_id = pid;
+	printf("Started receiver thread for node %d on %u\n", node_id, n->WF_TX->port);
 	while(1)
 	{
-		while((ReadBytes = getFromSocket(S.nodes[node_id].WF_TX, buff)) == -1)
+		while((ReadBytes = getFromSocket(n->WF_TX, buff)) == -1)
 		{
 			continue;
 		}
@@ -32,13 +34,24 @@ void* receiver(void* _node_id)
 		message->size = ReadBytes;
 
 		// Read timestamp
-		while((ReadBytes = getFromSocket(S.nodes[node_id].WF_TX, buff)) == -1)
+		while((ReadBytes = getFromSocket(n->WF_TX, buff)) == -1)
 		{
 			continue;
 		}
 		assert(ReadBytes == 8);
 		arrival = *((unsigned long int*)(buff));
-		
+		// Check action
+		if(n->Edge && n->Edge->current != n->Edge->action_amm)
+		{
+			cur_act = &(n->Edge->actions[n->Edge->current]);
+			if(actionActive(node_id) && CHECKBIT(Mute, cur_act->type))
+			{
+				printf("Muting message for %d\n", node_id);
+				printMessage(message->buffer, message->size);
+				// Delete message later
+				continue;
+			}
+		}
 		printf("Received from node %d with IP %d at %lu: ", S.nodes[node_id].id, S.nodes[node_id].IP, arrival);
 		printMessage(message->buffer, message->size);
 
