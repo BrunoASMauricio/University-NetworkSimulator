@@ -48,11 +48,11 @@ Y = Duration of the blocking action in seconds
 
 Z = Action specification number that is evaluated bit by bit. The "action" occurs for the specified duration.
 
-1XXX XXXX	Deafen (Node does not receive any message)
+XXXX XXX1	Deafen (Node does not receive any message)
 
-X1XX XXXX	Mute (Node does not transmit any message)
+XXXX XX1X	Mute (Node does not transmit any message)
 
-XX1X XXXX	Shutdown	(Node is shutdown, and afterwards brought back up)
+XXXX X1XX	Shutdown	(Node is shutdown, and afterwards brought back up)
 
 				(Messages are still sent to it)
 
