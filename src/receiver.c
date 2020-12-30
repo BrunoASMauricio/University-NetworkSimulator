@@ -40,6 +40,9 @@ void* receiver(void* _node_id)
 		}
 		assert(ReadBytes == 8);
 		arrival = *((unsigned long int*)(buff));
+
+		updateNodeState(((byte*)message->buffer)[0] & 0x0f);
+
 		// Check action
 		if(S.edges && n->Edge && n->Edge->current != n->Edge->action_amm)
 		{
@@ -54,8 +57,6 @@ void* receiver(void* _node_id)
 		}
 		printf("Received from node %d with IP %d at %lu: ", S.nodes[node_id].id, S.nodes[node_id].IP, arrival);
 		printMessage(message->buffer, message->size);
-
-		//updateNodeState(((byte*)message->buffer)[0] & 0x0f);
 
 		pthread_mutex_lock(&(S.Lock));
 		addToQueue(message, message->size, S.Sent, arrival);

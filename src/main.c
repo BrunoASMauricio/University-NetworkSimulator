@@ -254,8 +254,8 @@ void setupNodes()
 
 int newIP()
 {
-	static int ip = 0;
-	return ++ip;
+	static int ip = 1;
+	return ip++;
 }
 
 void simulator()

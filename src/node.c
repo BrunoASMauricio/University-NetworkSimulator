@@ -107,3 +107,8 @@ void nodeOff(int node_id)
 	kill(S.nodes[node_id].process_id, SIGINT);
 	S.nodes[node_id].up = false;
 }
+
+void updateNodeState(unsigned char a)
+{
+
+}
