@@ -5,7 +5,6 @@
 void* receiver(void* _node_id)
 {
 	int node_id;
-	pid_t pid;
 	action* cur_act;
 	
 	node_id	= *((int*)_node_id);
@@ -18,7 +17,6 @@ void* receiver(void* _node_id)
 	unsigned long int arrival;
 	node* n = &(S.nodes[node_id]);
 
-	n->process_id = pid;
 	printf("Started receiver thread for node %d on %u\n", node_id, n->WF_TX->port);
 	while(1)
 	{
