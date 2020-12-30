@@ -45,7 +45,8 @@ typedef struct{
 	socket_s* WS;
 	queue* Received;
 	edge_case* Edge;
-	byte state;
+	byte last_RX;
+	byte last_TX;
 	bool up;
 }node;
 

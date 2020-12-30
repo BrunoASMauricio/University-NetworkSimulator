@@ -4,6 +4,10 @@
 #include "main.h"
 #include "node.h"
 
+#define RX 0
+#define TX 1
+#define ANY 2
+
 enum state{
 	Outside = 0,
 	Waiting,
@@ -24,7 +28,8 @@ enum action_type{
 typedef struct{
 	unsigned long int delay;			// Time from entering stage, and engaging action
 	unsigned long int duration;		// Time from start of action, to end
-	int state;			// Start State, -1 is any state
+	int RX_or_TX;					// On RX (0) or TX (1) or ANY (2)
+	int message_type;				// The message type. Is ignored on type == ANY
 	unsigned long int started;
 	action_type type;
 }action;

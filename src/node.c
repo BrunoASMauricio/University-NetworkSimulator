@@ -103,7 +103,9 @@ void nodeOn(int node_id)
 
 void nodeOff(int node_id)
 {
-	printf("Killing node %d\n", node_id);
+	fprintf(stdout, "Killing node %d %d\n", S.nodes[node_id].process_id, getpid());
+	fflush(stdout);
+	sleep(1);
 	kill(S.nodes[node_id].process_id, SIGINT);
 	S.nodes[node_id].up = false;
 }

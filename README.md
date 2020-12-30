@@ -6,7 +6,7 @@ Simulates message exchange between nodes.
 
 Can simulate message loss, temporal collision and transmission jitter (NOT IMPLEMENTED).
 
-Can force edge cases to happen by performing user-defined actions, based on perceived protocol state and the given time intervals.
+Can force edge cases to happen by performing user-defined actions, based on perceived protocol state (last RX or TX message type) and the given time intervals.
 
 Reads network.sim.in to setup nodes and their communications.
 
@@ -33,15 +33,17 @@ Note:
 
 X.sim.in
 
-STATE0 X0 Y0 Z0
+STATE0 MESSAGE_TYPE0 X0 Y0 Z0
 
-STATE1 X1 Y1 Z1
+STATE1 MESSAGE_TYPE1 X1 Y1 Z1
 
 ...
 
-SATEK XK YK ZK
+STATEK MESSAGE_TYPEK XK YK ZK
 
-STATE = -1 (Any) | 0 (Outside) | 1 (Waiting) | 2 (Inside)
+STATE = RX | TX | ANY
+
+MESSAGE_TYPE = SD | PB | PR | ... | NEA
 
 X = Delay from when the state is first reached, to when the blocking action begins in seconds
 Y = Duration of the blocking action in seconds

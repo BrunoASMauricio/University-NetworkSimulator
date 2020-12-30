@@ -145,14 +145,6 @@ main(int argc, char **argv)
 			{
 				S.nodes[node_id].Edge->current = 0;
 			}
-			if(node_id == S.master)
-			{
-				S.nodes[node_id].state = 1;
-			}
-			else
-			{
-				S.nodes[node_id].state = 0;
-			}
 		}
 		
 		// Get node SNRs
@@ -254,7 +246,7 @@ void setupNodes()
 
 int newIP()
 {
-	static int ip = 1;
+	static int ip = 0;
 	return ip++;
 }
 

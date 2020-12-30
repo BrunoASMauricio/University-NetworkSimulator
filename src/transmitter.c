@@ -28,11 +28,6 @@ void* transmitter(void* _node_id)
 	}
 	*/
 	
-	// Start the actions
-	if(S.edges)
-	{
-		actionActive(node_id);
-	}
 	while(1)
 	{
 		while(S.nodes[node_id].Received->Size)
@@ -75,7 +70,14 @@ void* transmitter(void* _node_id)
 				{
 					continue;
 				}
-				printf("\t\t .............Message (%d bytes) sent to node %d, with SNR %u!, %d to go\n",n , node_id, S.nodes[node_id].Pbe[msg->node_id], S.nodes[node_id].Received->Size);
+				printf("\t\t .............Message (%d bytes) sent to node %d, with SNR %u!, %d to go\n",Received , node_id, S.nodes[node_id].Pbe[msg->node_id], S.nodes[node_id].Received->Size);
+
+				if(S.edges)
+				{
+					n->last_RX = ((byte*)(msg->buffer))[0] & 0x0f;
+					actionActive(node_id);
+				}
+
 			}
 			else
 			{

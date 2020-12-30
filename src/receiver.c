@@ -57,6 +57,11 @@ void* receiver(void* _node_id)
 		}
 		printf("Received from node %d with IP %d at %lu: ", S.nodes[node_id].id, S.nodes[node_id].IP, arrival);
 		printMessage(message->buffer, message->size);
+		if(S.edges)
+		{
+			n->last_TX = ((byte*)(message->buffer))[0] & 0x0f;
+			actionActive(node_id);
+		}
 
 		pthread_mutex_lock(&(S.Lock));
 		addToQueue(message, message->size, S.Sent, arrival);
