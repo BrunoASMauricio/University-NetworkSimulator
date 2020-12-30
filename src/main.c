@@ -138,6 +138,8 @@ main(int argc, char **argv)
 		S.nodes[node_id].id = node_id;
 		S.nodes[node_id].Pbe= (float*)malloc(sizeof(float)*(S.node_ammount));
 		S.nodes[node_id].IP = -1;
+		S.nodes[node_id].last_RX = 0;
+		S.nodes[node_id].last_TX = 0;
 		if(S.edges)
 		{
 			S.nodes[node_id].Edge = getEdgeActions(node_id);
