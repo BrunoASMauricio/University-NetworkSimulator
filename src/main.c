@@ -277,8 +277,6 @@ void simulator()
 			{
 				usleep(SIM_DELAY);
 			}
-			printf("112\n");
-
 			clock_gettime(CLOCK_REALTIME, &Res);
 
 			// Wait to check for collisions
@@ -293,7 +291,7 @@ void simulator()
 				printf("Sleeping (message hasnt been sent) %u\n", u_sleep);
 				usleep(u_sleep);
 			}
-			// Message was already sent, need to wait the rest of the SIM_DELAY
+			// Message was already "sent", need to wait the rest of the SIM_DELAY
 			else if(S.Sent->First->Pr + (unsigned long int)(SIM_DELAY*1000) > Act)
 			{
 				u_sleep = SIM_DELAY - (Act-S.Sent->First->Pr)/1000;
