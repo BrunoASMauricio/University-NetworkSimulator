@@ -19,7 +19,7 @@
 
 #define SAMPLE_SIZE 16
 // Simulator delay in us
-#define SIM_DELAY 1E4	//0.01 s
+#define SIM_DELAY (unsigned int)1E5	//0.01 s -> 100.000 us
 //#define WF_delay 10	// 10us/bit
 // WF delay per bit in ns
 #define WF_delay ((unsigned long int)(3*1E4)) // ~30us/bit

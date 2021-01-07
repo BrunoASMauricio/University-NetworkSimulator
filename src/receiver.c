@@ -13,8 +13,11 @@ void* receiver(void* _node_id)
 	int PacketSize;
 	inmessage* message;
 	int ReadBytes = 0;
+	int timestamp_size;
 	//int PrevBytes = 0;
 	unsigned long int arrival;
+	unsigned long int last_arrival = 0;
+	int last_read_Bytes;
 	node* n = &(S.nodes[node_id]);
 
 	printf("Started receiver thread for node %d on %u\n", node_id, n->WF_TX->port);
@@ -32,19 +35,26 @@ void* receiver(void* _node_id)
 		message->size = ReadBytes;
 
 		// Read timestamp
-		while((ReadBytes = getFromSocket(n->WF_TX, buff)) == -1)
+		while((timestamp_size = getFromSocket(n->WF_TX, buff)) == -1)
 		{
 			continue;
 		}
-		assert(ReadBytes == 8);
+		assert(timestamp_size == 8);
 		arrival = *((unsigned long int*)(buff));
 		
 		if(S.jitter)
 		{
-			// -Jitter/2 to Jitter/2 ms (60 ms)
-			printf("ARRIVAL BEFORE : %lu\n", arrival);
-			arrival += (range(0,WF_JITTER/2)-WF_JITTER/2)*1000000;
-			printf("ARRIVAL AFTER : %lu\n", arrival);
+			// New message arrived before the last one finished being sent
+			printf("before %lu\n", arrival);
+			if(last_arrival != 0 && last_arrival+WF_delay*last_read_Bytes*8 > arrival)
+			{
+				arrival = (unsigned long int)(last_arrival+WF_delay*last_read_Bytes*8+(unsigned long int)(range(0,WF_JITTER)*1000000));
+			}
+			else
+			{
+				arrival += (unsigned long int)(range(0,WF_JITTER)*1000000);
+			}
+			printf("after %lu\n", arrival);
 		}
 
 		updateNodeState(((byte*)message->buffer)[0] & 0x0f);
@@ -69,6 +79,8 @@ void* receiver(void* _node_id)
 			actionActive(node_id);
 		}
 
+		last_read_Bytes = ReadBytes;
+		last_arrival = arrival;
 		pthread_mutex_lock(&(S.Lock));
 		addToQueue(message, message->size, S.Sent, arrival);
 		pthread_mutex_unlock(&(S.Lock));

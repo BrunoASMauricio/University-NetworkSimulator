@@ -264,6 +264,7 @@ void simulator()
 	queue_el* Target_el;
 	unsigned long int Act;
 	unsigned long int intersect_t;
+	unsigned int u_sleep;
 
 	size = 0;
 
@@ -276,19 +277,32 @@ void simulator()
 			{
 				usleep(SIM_DELAY);
 			}
+			printf("112\n");
 
 			clock_gettime(CLOCK_REALTIME, &Res);
-			Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
 
 			// Wait to check for collisions
 			// | S.Sent->Last->Pr < intersect_t ??
 			// intersect_t = S.Sent->First->Pr + bufsize*(WF_delay*1000);
-			if(S.Sent->First->Pr + SIM_DELAY > Act)
+			Act = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
+			// Assure SIM_DELAY has passed since the first message was received
+			// Message was sent "after the current time" (possible due to jitter)
+			if(Act < S.Sent->First->Pr)
 			{
-				usleep(SIM_DELAY - ((Act-S.Sent->First->Pr)/1000));
+				u_sleep = (S.Sent->First->Pr-Act)/1000 + SIM_DELAY;
+				printf("Sleeping (message hasnt been sent) %u\n", u_sleep);
+				usleep(u_sleep);
 			}
-
+			// Message was already sent, need to wait the rest of the SIM_DELAY
+			else if(S.Sent->First->Pr + (unsigned long int)(SIM_DELAY*1000) > Act)
+			{
+				u_sleep = SIM_DELAY - (Act-S.Sent->First->Pr)/1000;
+				printf("Sleeping (simulator delay) %u\n", u_sleep);
+				usleep(u_sleep);
+			}
+			
 			pthread_mutex_lock(&(S.Lock));
+
 			printf("\n-------------------------------------\n");
 			size = S.Sent->Size;
 			printf("\t\t %d messages to analyze\n", size);
