@@ -22,7 +22,7 @@
 #define SIM_DELAY 1E4	//0.01 s
 //#define WF_delay 10	// 10us/bit
 // WF delay per bit in ns
-#define WF_delay ((unsigned long int)(3*1E4)) // 30us/bit
+#define WF_delay ((unsigned long int)(3*1E4)) // ~30us/bit
 
 // Jitter in ms
 #define WF_JITTER 30	// 30ms

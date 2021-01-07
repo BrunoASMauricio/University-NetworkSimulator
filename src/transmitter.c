@@ -34,7 +34,7 @@ void* transmitter(void* _node_id)
 		{
 			msg = (inmessage*)popFromQueue(&bufsize, S.nodes[node_id].Received);
 
-			if(msg->node_id != node_id){
+			if(1 || msg->node_id != node_id){
 				if(S.edges && n->Edge && n->Edge->current != n->Edge->action_amm)
 				{
 					cur_act = &(n->Edge->actions[n->Edge->current]);
