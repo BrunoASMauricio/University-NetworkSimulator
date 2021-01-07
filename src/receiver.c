@@ -38,6 +38,14 @@ void* receiver(void* _node_id)
 		}
 		assert(ReadBytes == 8);
 		arrival = *((unsigned long int*)(buff));
+		
+		if(S.jitter)
+		{
+			// -Jitter/2 to Jitter/2 ms (60 ms)
+			printf("ARRIVAL BEFORE : %lu\n", arrival);
+			arrival += (range(0,WF_JITTER/2)-WF_JITTER/2)*1000000;
+			printf("ARRIVAL AFTER : %lu\n", arrival);
+		}
 
 		updateNodeState(((byte*)message->buffer)[0] & 0x0f);
 

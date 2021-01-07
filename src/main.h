@@ -19,10 +19,13 @@
 
 #define SAMPLE_SIZE 16
 // Simulator delay in us
-#define SIM_DELAY 1E5	//1 s
+#define SIM_DELAY 1E4	//0.01 s
 //#define WF_delay 10	// 10us/bit
 // WF delay per bit in ns
 #define WF_delay ((unsigned long int)(3*1E4)) // 30us/bit
+
+// Jitter in ms
+#define WF_JITTER 30	// 30ms
 
 //maximum message delay inside the simulator in ns
 #define MAX_PACKET_SEND_DELAY 1E6
