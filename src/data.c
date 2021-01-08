@@ -200,15 +200,7 @@ getPacketSize(void* buf)
 	switch(type)
 	{
 		case SD:
-			helper = ((char*)buf)[6]*SAMPLE_SIZE;
-			if(8*(helper/8) != helper)
-			{
-				helper = helper/8 +1;
-			}
-			else
-			{
-				helper /= 8;
-			}
+			helper = ((char*)buf)[6] & 0xff;
 			return Packet_Sizes[SD] + helper;
 		case TB:
 			helper = ((short*)buf)[8];
