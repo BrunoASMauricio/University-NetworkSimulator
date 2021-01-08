@@ -39,6 +39,12 @@ void* receiver(void* _node_id)
 		{
 			continue;
 		}
+		if(timestamp_size != 8)
+		{
+			dumpBin(buff, ReadBytes, "YEEE %d %d\n", node_id, timestamp_size);fflush(stdout);
+			printf("Ye\n");
+			fflush(stdout);
+		}
 		assert(timestamp_size == 8);
 		arrival = *((unsigned long int*)(buff));
 		
