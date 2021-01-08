@@ -50,9 +50,10 @@ void* transmitter(void* _node_id)
 				if(S.Pbe)
 				{
 					float ch = randomChance();
+					printf("Chances from node %d to node %d\n%f %f (%d), ch = %f\n",msg->node_id, node_id,S.nodes[node_id].Pbe[msg->node_id], S.nodes[node_id].Pbe[msg->node_id]*(float)getPacketSize(msg->buffer), getPacketSize(msg->buffer), ch);
 					if(ch < S.nodes[node_id].Pbe[msg->node_id]*getPacketSize(msg->buffer))
 					{
-						printf("PACKET LOST %f %f\n", ch, S.nodes[node_id].Pbe[msg->node_id]);
+						printf("PACKET LOST %f %f for node %d\n", ch, S.nodes[node_id].Pbe[msg->node_id], node_id);
 						printMessage(msg->buffer, getPacketSize(msg->buffer));
 						will_send = false;
 					}
@@ -70,7 +71,7 @@ void* transmitter(void* _node_id)
 				{
 					continue;
 				}
-				printf("\t\t .............Message (%d bytes) sent to node %d, with SNR %u!, %d to go\n",Received , node_id, S.nodes[node_id].Pbe[msg->node_id], S.nodes[node_id].Received->Size);
+				printf("\t\t .............Message (%d bytes) sent to node %d, with SNR %f!, %d to go\n",Received , node_id, S.nodes[node_id].Pbe[msg->node_id], S.nodes[node_id].Received->Size);
 
 				if(S.edges)
 				{
