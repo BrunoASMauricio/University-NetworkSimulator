@@ -41,7 +41,7 @@ void* receiver(void* _node_id)
 		}
 		if(timestamp_size != 8)
 		{
-			dumpBin(buff, ReadBytes, "YEEE %d %d\n", node_id, timestamp_size);fflush(stdout);
+			dumpBin(buff, timestamp_size, "YEEE %d %d\n", node_id, timestamp_size);fflush(stdout);
 			printf("Ye\n");
 			fflush(stdout);
 		}
