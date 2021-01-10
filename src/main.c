@@ -390,7 +390,6 @@ void simulator()
 			while(S.Sent->Size)
 			{
 				buf = popFromQueue(&bufsize, S.Sent, 0);
-				dumpBin((char*)((inmessage*)buf)->buffer, bufsize, "\tMessage sent successfully!\n");
 				for(int node_id = 0; node_id < S.node_ammount; node_id++)
 				{
 					addToQueue(buf, bufsize, S.nodes[node_id].Received, 1);
