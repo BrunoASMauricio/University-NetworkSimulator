@@ -80,7 +80,10 @@ void dumpBin(char* buf, int size, const char *fmt,...)
 
 	pthread_mutex_lock(&(S.OutputLock));
 	fprintf(stdout, "[%lu] [!]", se);
-	vfprintf(stdout, fmt, args);
+	if(strlen(fmt))
+	{
+		vfprintf(stdout, fmt, args);
+	}
 
 	for(int i = 0; i < size; i++)
     {
