@@ -91,7 +91,8 @@ void nodeOn(int node_id)
 			}
 			close(1);		// Close stdout
 			dup(p2[1]);		// On fd 1, set pipe input
-			execlp("../protocol/NP", "NP","-s", "-r", isMaster, "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-d", NULL);
+			//execlp("../protocol/NP", "NP","-s", "-r", isMaster, "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-d", NULL);
+			execlp("../protocol/NP", "NP", "-r", isMaster, "--WS", pWS, "--HW", pHW, "--WF_TX", pWF_TX, "--WF_RX", pWF_RX, "--IP", pIP, "-d", NULL);
 			fatalErr("Could not start node %d\n", node_id);
 		}
 		fatalErr("Could not start something %d\n", node_id);

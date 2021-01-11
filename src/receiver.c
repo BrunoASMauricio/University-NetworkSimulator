@@ -19,6 +19,7 @@ void* receiver(void* _node_id)
 	unsigned long int last_arrival = 0;
 	int last_read_Bytes;
 	node* n = &(S.nodes[node_id]);
+	timespec Res;
 
 	printf("Started receiver thread for node %d on %u\n", node_id, n->WF_TX->port);
 	while(1)
@@ -35,6 +36,7 @@ void* receiver(void* _node_id)
 		message->size = ReadBytes;
 
 		// Read timestamp
+		/*
 		while((timestamp_size = getFromSocket(n->WF_TX, buff)) == -1)
 		{
 			continue;
@@ -47,6 +49,9 @@ void* receiver(void* _node_id)
 		}
 		assert(timestamp_size == 8);
 		arrival = *((unsigned long int*)(buff));
+		*/
+		clock_gettime(CLOCK_REALTIME, &Res);
+		arrival = Res.tv_sec * (int64_t)1000000000UL + Res.tv_nsec;
 		
 		if(S.jitter)
 		{
