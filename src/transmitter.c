@@ -85,6 +85,5 @@ void* transmitter(void* _node_id)
 				printf("Ignoring message for node %d\n", node_id);
 			}
 		}
-		sleep(1);
 	}
 }
