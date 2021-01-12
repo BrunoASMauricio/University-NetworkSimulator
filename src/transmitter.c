@@ -30,6 +30,7 @@ void* transmitter(void* _node_id)
 	
 	while(1)
 	{
+		usleep(10);
 		while(S.nodes[node_id].Received->Size)
 		{
 			msg = (inmessage*)popFromQueue(&bufsize, S.nodes[node_id].Received);
