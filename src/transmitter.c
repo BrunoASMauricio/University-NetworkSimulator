@@ -72,7 +72,7 @@ void* transmitter(void* _node_id)
 				{
 					continue;
 				}
-				dumpBin((char*)(msg->buffer), bufsize, "\t\t .............Message (%d/%d bytes) sent to node %d, with SNR %f!, %d to go\n",Received, bufsize, node_id, S.nodes[node_id].Pbe[msg->node_id], S.nodes[node_id].Received->Size);
+				dumpBin((char*)(msg->buffer), bufsize, "\t\t .............Message (%d/%d bytes) sent from node %d to node %d, with SNR %f!, %d to go\n",Received, bufsize,msg->node_id, node_id, S.nodes[node_id].Pbe[msg->node_id], S.nodes[node_id].Received->Size);
 
 				if(S.edges)
 				{
