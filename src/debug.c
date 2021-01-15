@@ -32,7 +32,7 @@ printfLog(const char *fmt, ...)
 
 	va_start(args, fmt);
 	pthread_mutex_lock(&(S.OutputLock));
-	fprintf(stdout, "[%lu] [!] [%02d:%02d:%02d]", se, hours, minutes, seconds);
+	fprintf(stdout, "[%lu] [!] (%02d:%02d:%02d)", se, hours, minutes, seconds);
 	vfprintf(stdout, fmt, args);
 	pthread_mutex_unlock(&(S.OutputLock));
 	va_end(args);
