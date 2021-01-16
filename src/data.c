@@ -1,5 +1,13 @@
 #include "data.h"
 
+double pow(double base, int exp){
+	double ret = 1;
+	for(int i = 0; i < exp; i++){
+		ret *= base;
+	}
+	return ret;
+}
+
 float
 randomChance()
 {

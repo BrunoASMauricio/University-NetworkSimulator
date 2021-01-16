@@ -32,6 +32,9 @@ enum packet_type{
 	NEA
 };
 
+double
+pow(double base, int exp);
+
 float
 randomChance();
 
