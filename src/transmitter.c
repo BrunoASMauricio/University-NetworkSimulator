@@ -50,13 +50,24 @@ void* transmitter(void* _node_id)
 				will_send = true;
 				if(S.Pbe)
 				{
-					float ch = randomChance();
-					printf("Chances from node %d to node %d\n%f %f (%d), ch = %f\n",msg->node_id, node_id,S.nodes[node_id].Pbe[msg->node_id], S.nodes[node_id].Pbe[msg->node_id]*(float)getPacketSize(msg->buffer), getPacketSize(msg->buffer), ch);
-					if(ch < S.nodes[node_id].Pbe[msg->node_id]*getPacketSize(msg->buffer))
+					double ch = randomChance();
+					double p = 1-pow(1-S.nodes[node_id].Pbe[msg->node_id], getPacketSize(msg->buffer));
+					printf("Chances from node %d to node %d\n%f %f (%d), ch = %f\n",
+							msg->node_id,
+							node_id,
+							S.nodes[node_id].Pbe[msg->node_id],
+							p,
+							getPacketSize(msg->buffer), ch);
+					printf("%f %f\n", 1-S.nodes[node_id].Pbe[msg->node_id], p);
+					if(ch < p)
 					{
 						printf("PACKET LOST %f %f for node %d\n", ch, S.nodes[node_id].Pbe[msg->node_id], node_id);
 						printMessage(msg->buffer, getPacketSize(msg->buffer));
 						will_send = false;
+					}
+					else
+					{
+						printf("PACKET NOT LOST!\n");
 					}
 				}
 				if(!will_send)
