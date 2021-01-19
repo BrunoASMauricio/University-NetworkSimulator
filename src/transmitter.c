@@ -61,7 +61,7 @@ void* transmitter(void* _node_id)
 					printf("%f %f\n", 1-S.nodes[node_id].Pbe[msg->node_id], p);
 					if(ch < p)
 					{
-						printf("PACKET LOST %f %f for node %d\n", ch, S.nodes[node_id].Pbe[msg->node_id], node_id);
+						printf("PACKET LOST %f %f from node %d to node %d\n", ch, S.nodes[node_id].Pbe[msg->node_id], msg->node_id, node_id);
 						printMessage(msg->buffer, getPacketSize(msg->buffer));
 						will_send = false;
 					}
