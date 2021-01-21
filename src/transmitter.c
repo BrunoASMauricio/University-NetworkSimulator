@@ -79,7 +79,19 @@ void* transmitter(void* _node_id)
 				{
 					continue;
 				}
-				while(sendToSocket(S.nodes[node_id].WF_RX, &(S.nodes[node_id].Pbe[msg->node_id]), 4) == -1)
+				float pbe = S.nodes[node_id].Pbe[msg->node_id];
+				/*
+				static float i = 0;
+				float rdc = randomChance();
+				if(rdc < 0.2){
+					rdc = randomChance();
+					pbe += 0.0001;
+				}
+				*/
+				if(!pbe){
+					pbe = 0.0000001;
+				}
+				while(sendToSocket(S.nodes[node_id].WF_RX, &(pbe), 4) == -1)
 				{
 					continue;
 				}
